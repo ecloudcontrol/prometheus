@@ -49,6 +49,15 @@ scrape_configs:
     - targets: ['172.16.30.12:9182']
       labels:
         instance: 'UNITYSQLSVR002'
+    - targets: ['172.16.10.26:9182']
+      labels:
+        instance: 'UNITYWEB02'
+    - targets: ['172.16.30.11:9182']
+      labels:
+        instance: 'UNITYSQLSVR001'
+    - targets: ['172.16.10.20:9182']
+      labels:
+        instance: 'UNITYWEB01'
 
   - job_name: 'kubernetes-cadvisor'
     scheme: https
