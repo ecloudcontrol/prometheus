@@ -43,9 +43,9 @@ groups:
     labels:
       severity: warning
     annotations:
-    title: "Low Disk space"
-    summary: Host out of disk space (instance {{ $labels.instance }})
-    description: "Disk is getting full (< 10% left)\n  Available Space is only= {{ $value }} %\n  LABELS = {{ $labels }}"
+      title: "Low Disk space"
+      summary: Host out of disk space (instance {{ $labels.instance }})
+      description: "Disk is getting full (< 10% left)\n  Available Space is only= {{ $value }} %\n  LABELS = {{ $labels }}"
 
      
 - name: CPU-load
@@ -56,8 +56,8 @@ groups:
     labels:
       severity: warning
     annotations:
-    summary: "High CPU load (instance {{ $labels.instance }})"
-    description: "CPU load is high\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      summary: "High CPU load (instance {{ $labels.instance }})"
+      description: "CPU load is high\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 - name: Windows-CPU-Usage
   rules:
   - alert: WindowsHighCpuUsage
@@ -66,10 +66,10 @@ groups:
     labels:
       severity: warning
     annotations:
-    summary: High CPU usage on Windows Server (instance {{ $labels.instance }})
-    description: "CPU usage is > 95% for more than 3 minutes.\n  VALUE = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
-    host: "{{ $labels.instance }}"
-    title: "High CPU Usage"
+      summary: High CPU usage on Windows Server (instance {{ $labels.instance }})
+      description: "CPU usage is > 95% for more than 3 minutes.\n  VALUE = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "High CPU Usage"
 
 - name: Windows-Memory-Usage
   rules:
@@ -79,10 +79,10 @@ groups:
     labels:
       severity: warning
     annotations:
-    summary: Low memory on Windows Server (instance {{ $labels.instance }})
-    description: "Available memory is < 10% of total memory.\n  VALUE = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
-    host: "{{ $labels.instance }}"
-    title: "Low Memory"
+      summary: Low memory on Windows Server (instance {{ $labels.instance }})
+      description: "Available memory is < 10% of total memory.\n  VALUE = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "Low Memory"
 
 - name: Windows-Disk-Usage
   rules:
@@ -92,10 +92,10 @@ groups:
     labels:
       severity: critical
     annotations:
-    summary: Low disk space on Windows Server (instance {{ $labels.instance }})
-    description: "Disk space is < 15% on volume {{ $labels.volume }}.\n  Available Space = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
-    host: "{{ $labels.instance }}"
-    title: "Low Disk Space"
+      summary: Low disk space on Windows Server (instance {{ $labels.instance }})
+      description: "Disk space is < 15% on volume {{ $labels.volume }}.\n  Available Space = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "Low Disk Space"
 
   - alert: WindowsHighDiskLatency
     expr: rate(windows_logical_disk_read_write_latency_seconds_total[5m]) > 0.1
@@ -103,10 +103,10 @@ groups:
     labels:
       severity: warning
     annotations:
-    summary: High disk latency on Windows Server (instance {{ $labels.instance }})
-    description: "Average disk read/write latency is > 100ms on volume {{ $labels.volume }}.\n  VALUE = {{ $value | printf \"%.3f\" }} seconds\n  LABELS = {{ $labels }}"
-    host: "{{ $labels.instance }}"
-    title: "High Disk Latency"
+      summary: High disk latency on Windows Server (instance {{ $labels.instance }})
+      description: "Average disk read/write latency is > 100ms on volume {{ $labels.volume }}.\n  VALUE = {{ $value | printf \"%.3f\" }} seconds\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "High Disk Latency"
 
 - name: Windows-Network-Usage
   rules:
@@ -116,10 +116,10 @@ groups:
     labels:
       severity: warning
     annotations:
-    summary: High network usage on Windows Server (instance {{ $labels.instance }})
-    description: "Network usage exceeds 10MB/s on interface {{ $labels.nic }}.\n  VALUE = {{ $value | printf \"%.2f\" }} bytes/s\n  LABELS = {{ $labels }}"
-    host: "{{ $labels.instance }}"
-    title: "High Network Usage"
+      summary: High network usage on Windows Server (instance {{ $labels.instance }})
+      description: "Network usage exceeds 10MB/s on interface {{ $labels.nic }}.\n  VALUE = {{ $value | printf \"%.2f\" }} bytes/s\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "High Network Usage"
 
   - alert: WindowsNetworkErrors
     expr: rate(windows_net_packets_received_errors_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 0 or rate(windows_net_packets_outbound_errors_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 0
@@ -127,7 +127,7 @@ groups:
     labels:
       severity: critical
     annotations:
-    summary: Network errors detected on Windows Server (instance {{ $labels.instance }})
-    description: "Network errors detected on interface {{ $labels.nic }}.\n  LABELS = {{ $labels }}"
-    host: "{{ $labels.instance }}"
-    title: "Network Errors"
+      summary: Network errors detected on Windows Server (instance {{ $labels.instance }})
+      description: "Network errors detected on interface {{ $labels.nic }}.\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "Network Errors"
