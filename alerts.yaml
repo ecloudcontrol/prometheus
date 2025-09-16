@@ -125,7 +125,7 @@ groups:
     expr: rate(windows_net_packets_received_errors_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 0 or rate(windows_net_packets_outbound_errors_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 0
     for: 5m
     labels:
-      severity: critical
+       severity: critical
      annotations:
      summary: Network errors detected on Windows Server (instance {{ $labels.instance }})
      description: "Network errors detected on interface {{ $labels.nic }}.\n  LABELS = {{ $labels }}"
