@@ -27,4 +27,4 @@ volumes:
   
 properties:
     RETENTION_TIME: 30d
-    revision : 2
+    revision : 3
