@@ -76,7 +76,9 @@ scrape_configs:
     - targets: ['172.16.40.6:9182']
       labels:
         instance: 'UnityTest02'
-
+    - targets: ['10.10.33.4:9182']
+      labels:
+        instance: 'UNITYPROC01'
   - job_name: 'kubernetes-cadvisor'
     scheme: https
     tls_config:
