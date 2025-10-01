@@ -131,3 +131,13 @@ groups:
       description: "Network errors detected on interface {{ $labels.nic }}.\n  LABELS = {{ $labels }}"
       host: "{{ $labels.instance }}"
       title: "Network Errors"
+- name: windows_server_alerts
+  rules:
+  - alert: WindowsServerDown
+    expr: probe_success{job="windows_servers_up"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Windows server {{ $labels.instance }} is down"
+      description: "ICMP probe failed for instance {{ $labels.instance }}. Check network or server status."
