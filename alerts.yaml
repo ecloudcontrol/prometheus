@@ -87,7 +87,7 @@ groups:
 - name: Windows-Disk-Usage
   rules:
   - alert: WindowsLowDiskSpace
-    expr: (windows_logical_disk_free_bytes / windows_logical_disk_size_bytes * 100) < 15
+    expr: (windows_logical_disk_free_bytes / windows_logical_disk_size_bytes * 100) < 10
     for: 5m
     labels:
       severity: critical
