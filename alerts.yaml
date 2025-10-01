@@ -93,7 +93,7 @@ groups:
       severity: critical
     annotations:
       summary: Low disk space on Windows Server (instance {{ $labels.instance }})
-      description: "Disk space is < 15% on volume {{ $labels.volume }}.\n  Available Space = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
+      description: "Disk space is < 10% on volume {{ $labels.volume }}.\n  Available Space = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
       host: "{{ $labels.instance }}"
       title: "Low Disk Space"
 
