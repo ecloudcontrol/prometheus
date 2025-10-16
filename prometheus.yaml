@@ -125,4 +125,26 @@ scrape_configs:
       regex: (.+)
       target_label: __metrics_path__
       replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
-      
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://unityfisolutions.com/
+          - https://ach.sandtechnologygroup.com/
+          - https://portal.checxchange.com/
+          - https://goach.com/
+          - https://mca-track.com/
+          - https://www.gobeepay.com/
+          - https://unity.sandtechnologygroup.com/
+          - https://sedatabeta.easydraft.com/
+          - https://api.sandtechnologygroup.com/AccountServices/swagger/ui/index
+          - https://services.easydraft.com/accountservices/swagger
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter-0-2:9115
