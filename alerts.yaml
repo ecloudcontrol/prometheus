@@ -119,13 +119,13 @@ groups:
       title: "Low Disk Space"
 
   - alert: WindowsHighDiskLatency
-    expr: rate(windows_logical_disk_read_write_latency_seconds_total[10m]) > 0.1
-    for: 10m
+    expr: rate(windows_logical_disk_read_write_latency_seconds_total[10m]) > 0.5   # 0.5s threshold
+    for: 15m
     labels:
       severity: warning
     annotations:
       summary: High disk latency on Windows Server (instance {{ $labels.instance }})
-      description: "Average disk latency > 100ms for 10 minutes on volume {{ $labels.volume }}.\n  VALUE = {{ $value | printf \"%.3f\" }}s\n  LABELS = {{ $labels }}"
+      description: "Average disk latency > 500ms for 15 minutes on volume {{ $labels.volume }}.\n  VALUE = {{ $value | printf \"%.3f\" }}s\n  LABELS = {{ $labels }}"
       host: "{{ $labels.instance }}"
       title: "High Disk Latency"
 
