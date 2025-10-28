@@ -19,33 +19,29 @@ rule_files:
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
 scrape_configs:
-  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: 'prometheus'
     static_configs:
-    - targets: ['localhost:9090']
-  - job_name: 'graylog'
-    scrape_interval: 15s
-    metrics_path: '/api/plugins/org.graylog.plugins.metrics.prometheus/metrics'
-    basic_auth:
-      username: admin
-      password: 4FTZOx9ACdbAw65WJH1u
-    # Optional TLS configuration; see https://prometheus.io/docs/operating/configuration/#<tls_config>
-    #tls_config:
-    static_configs:
-      - targets: ['cloudorbit-vv.lowtouchcloud.io:443/logs.alpha-dev/']
+      - targets: ['localhost:9090']
       
   - job_name: 'node-exporter'
     static_configs:
-    - targets: ['10.0.0.2:9100','192.168.195.202:9100','192.168.195.229:9100']
-    metric_relabel_configs:
-      - source_labels: ['nodename']
-        regex: '(engine.master)'
+    - targets: 
+        - 10.0.0.2:9100
+        - 192.168.195.202:9100
+        - 192.168.195.229:9100
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: 10.0.0.2:9100
         target_label: nodename
-        replacement: appz-${1}
-      - source_labels: ['nodename']
-        regex: 'k8s.worker.node.(.*)'
+        replacement: engine-master
+      - source_labels: [__address__]
+        regex: 192.168.195.202:9100
         target_label: nodename
-        replacement: appz-dev-worker-${1}
+        replacement: VV-dev-worker-0
+      - source_labels: [__address__]
+        regex: 192.168.195.229:9100
+        target_label: nodename
+        replacement: VV-dev-worker-1
         
   - job_name: 'kube-state-metrics'
     static_configs:
