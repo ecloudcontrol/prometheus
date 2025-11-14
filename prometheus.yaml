@@ -112,6 +112,13 @@ scrape_configs:
       labels:
         instance: 'windows-server'
 
+  - job_name: 'kafka-exporter'
+    static_configs:
+      - targets:
+        - 10.2.4.135:9308
+        - 10.2.4.5:9308
+        - 10.2.4.134:9308
+
   - job_name: 'app_db_health'
     scrape_interval: 15s
     metrics_path: /probe
@@ -142,4 +149,3 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
-
