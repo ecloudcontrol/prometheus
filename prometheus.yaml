@@ -29,6 +29,13 @@ scrape_configs:
           - 172.234.136.73:9100
           - 192.168.175.154:9100
           - 192.168.175.224:9100
+          - 192.168.168.69:9100
+          - 192.168.168.198:9100
+          - 192.168.168.210:9100
+          - 192.168.168.177:9100
+          - 192.168.181.54:9100
+          - 192.168.181.81:9100
+          - 1192.168.181.73:9100
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.130.209:9100
@@ -66,6 +73,34 @@ scrape_configs:
         regex: 192.168.175.224:9100
         target_label: nodename
         replacement: mysql-prod-node-1
+      - source_labels: [__address__]
+        regex: 192.168.168.69:9100
+        target_label: nodename
+        replacement: kafka-node-0 
+      - source_labels: [__address__]
+        regex: 192.168.168.198:9100
+        target_label: nodename
+        replacement: kafka-node-1  
+      - source_labels: [__address__]
+        regex: 192.168.168.210:9100
+        target_label: nodename
+        replacement: kafka-node-3
+      - source_labels: [__address__]
+        regex: 192.168.168.177:9100
+        target_label: nodename
+        replacement: chart-db-node-0
+      - source_labels: [__address__]
+        regex: 192.168.181.54:9100
+        target_label: nodename
+        replacement: chart-app-node-0
+      - source_labels: [__address__]
+        regex: 192.168.181.81:9100
+        target_label: nodename
+        replacement: chart-app-node-1
+      - source_labels: [__address__]
+        regex: 192.168.181.73:9100
+        target_label: nodename
+        replacement: chart-app-node-2
   - job_name: 'kube-state-metrics'
     static_configs:
       - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
@@ -112,6 +147,13 @@ scrape_configs:
       labels:
         instance: 'windows-server'
 
+  - job_name: 'kafka-exporter'
+    static_configs:
+      - targets:
+        - 10.2.4.135:9308
+        - 10.2.4.5:9308
+        - 10.2.4.134:9308
+
   - job_name: 'app_db_health'
     scrape_interval: 15s
     metrics_path: /probe
@@ -142,4 +184,3 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
-
