@@ -74,192 +74,193 @@ groups:
       annotations:
         summary: "MySQL down on {{ $labels.instance }}"
         description: "TCP connection to MySQL port 3306 failed (likely VPN issue)"
+
 - name: High-Pod-CPU
   rules:
-  - alert: HighPodCPU
-    expr: avg(rate(container_cpu_usage_seconds_total{namespace!="",image!="",container_name!="POD"}[5m])*100) by (pod,namespace  )  > 100
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: HighCpuUsage
-      description: "Pod cpu average value : {{ $value | printf \"%.2f\" }}"  
+    - alert: HighPodCPU
+      expr: avg(rate(container_cpu_usage_seconds_total{namespace!="",image!="",container_name!="POD"}[5m])*100) by (pod,namespace) > 100
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: HighCpuUsage
+        description: "Pod cpu average value : {{ $value | printf \"%.2f\" }}"
 
 - name: PVC-usage
   rules:
-  - alert: PVCHighUsage
-    expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) * 100 > 70
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: PVC high usage (namespace {{ $labels.namespace }}, claim {{ $labels.persistentvolumeclaim }})
-      description: |-
-        Description: PVC usage > 70%
-        VALUE = {{ $value }}%
+    - alert: PVCHighUsage
+      expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) * 100 > 70
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: PVC high usage (namespace {{ $labels.namespace }}, claim {{ $labels.persistentvolumeclaim }})
+        description: |-
+          Description: PVC usage > 70%
+          VALUE = {{ $value }}%
+
 # -----------------------------
 # Windows Alerts Section Added
 # -----------------------------
 
 - name: Windows-CPU-Usage
   rules:
-  - alert: WindowsHighCpuUsage
-    expr: 100 - (sum by (instance) (rate(windows_cpu_time_total{mode="idle"}[2m])) / count by (instance) (windows_cpu_time_total{mode="idle"}) * 100) > 95
-    for: 3m
-    labels:
-      severity: warning
-    annotations:
-      summary: High CPU usage on Windows Server (instance {{ $labels.instance }})
-      description: "CPU usage is > 95% for more than 3 minutes.\n  VALUE = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
-      host: "{{ $labels.instance }}"
-      title: "High CPU Usage"
+    - alert: WindowsHighCpuUsage
+      expr: 100 - (sum by (instance) (rate(windows_cpu_time_total{mode="idle"}[2m])) / count by (instance)(windows_cpu_time_total{mode="idle"}) * 100) > 95
+      for: 3m
+      labels:
+        severity: warning
+      annotations:
+        summary: High CPU usage on Windows Server (instance {{ $labels.instance }})
+        description: "CPU usage is > 95% for more than 3 minutes.\n  VALUE = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
+        host: "{{ $labels.instance }}"
+        title: "High CPU Usage"
 
 - name: Windows-Memory-Usage
   rules:
-  - alert: WindowsLowMemory
-    expr: (windows_os_physical_memory_free_bytes / windows_os_visible_memory_bytes * 100) < 10
-    for: 10m
-    labels:
-      severity: warning
-    annotations:
-      summary: Low memory on Windows Server (instance {{ $labels.instance }})
-      description: "Available memory is < 10% of total memory.\n  VALUE = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
-      host: "{{ $labels.instance }}"
-      title: "Low Memory"
+    - alert: WindowsLowMemory
+      expr: (windows_os_physical_memory_free_bytes / windows_os_visible_memory_bytes * 100) < 10
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: Low memory on Windows Server (instance {{ $labels.instance }})
+        description: "Available memory is < 10% of total memory.\n  VALUE = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
+        host: "{{ $labels.instance }}"
+        title: "Low Memory"
 
 - name: Windows-Disk-Usage
   rules:
-  - alert: WindowsLowDiskSpace
-    expr: (windows_logical_disk_free_bytes / windows_logical_disk_size_bytes * 100) < 15
-    for: 5m
-    labels:
-      severity: critical
-    annotations:
-      summary: Low disk space on Windows Server (instance {{ $labels.instance }})
-      description: "Disk space is < 15% on volume {{ $labels.volume }}.\n  Available Space = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
-      host: "{{ $labels.instance }}"
-      title: "Low Disk Space"
+    - alert: WindowsLowDiskSpace
+      expr: (windows_logical_disk_free_bytes / windows_logical_disk_size_bytes * 100) < 15
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Low disk space on Windows Server (instance {{ $labels.instance }})
+        description: "Disk space is < 15% on volume {{ $labels.volume }}.\n  Available Space = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
+        host: "{{ $labels.instance }}"
+        title: "Low Disk Space"
 
-  - alert: WindowsHighDiskLatency
-    expr: rate(windows_logical_disk_read_write_latency_seconds_total[5m]) > 0.1
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: High disk latency on Windows Server (instance {{ $labels.instance }})
-      description: "Average disk read/write latency is > 100ms on volume {{ $labels.volume }}.\n  VALUE = {{ $value | printf \"%.3f\" }} seconds\n  LABELS = {{ $labels }}"
-      host: "{{ $labels.instance }}"
-      title: "High Disk Latency"
+    - alert: WindowsHighDiskLatency
+      expr: rate(windows_logical_disk_read_write_latency_seconds_total[5m]) > 0.1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: High disk latency on Windows Server (instance {{ $labels.instance }})
+        description: "Average disk read/write latency is > 100ms on volume {{ $labels.volume }}.\n  VALUE = {{ $value | printf \"%.3f\" }} seconds\n  LABELS = {{ $labels }}"
+        host: "{{ $labels.instance }}"
+        title: "High Disk Latency"
 
 - name: Windows-Network-Usage
   rules:
-  - alert: WindowsHighNetworkUsage
-    expr: rate(windows_net_bytes_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 10000000
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: High network usage on Windows Server (instance {{ $labels.instance }})
-      description: "Network usage exceeds 10MB/s on interface {{ $labels.nic }}.\n  VALUE = {{ $value | printf \"%.2f\" }} bytes/s\n  LABELS = {{ $labels }}"
-      host: "{{ $labels.instance }}"
-      title: "High Network Usage"
+    - alert: WindowsHighNetworkUsage
+      expr: rate(windows_net_bytes_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 10000000
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: High network usage on Windows Server (instance {{ $labels.instance }})
+        description: "Network usage exceeds 10MB/s on interface {{ $labels.nic }}.\n  VALUE = {{ $value | printf \"%.2f\" }} bytes/s\n  LABELS = {{ $labels }}"
+        host: "{{ $labels.instance }}"
+        title: "High Network Usage"
 
-  - alert: WindowsNetworkErrors
-    expr: rate(windows_net_packets_received_errors_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 0 or rate(windows_net_packets_outbound_errors_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 0
-    for: 5m
-    labels:
-      severity: critical
-    annotations:
-      summary: Network errors detected on Windows Server (instance {{ $labels.instance }})
-      description: "Network errors detected on interface {{ $labels.nic }}.\n  LABELS = {{ $labels }}"
-      host: "{{ $labels.instance }}"
-      title: "Network Errors"
+    - alert: WindowsNetworkErrors
+      expr: rate(windows_net_packets_received_errors_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 0 or rate(windows_net_packets_outbound_errors_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Network errors detected on Windows Server (instance {{ $labels.instance }})
+        description: "Network errors detected on interface {{ $labels.nic }}.\n  LABELS = {{ $labels }}"
+        host: "{{ $labels.instance }}"
+        title: "Network Errors"
 
-  - name: MySQL-ReplicaDown
+- name: MySQL-ReplicaDown
   rules:
-  - alert: MySQLReplicaDown
-    expr: mysql_up == 0
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MySQL Replica Down (instance {{ $labels.instance }})"
-      description: "The MySQL exporter or replica is unreachable.\nVALUE = {{ $value }}\nLABELS = {{ $labels }}"
+    - alert: MySQLReplicaDown
+      expr: mysql_up == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MySQL Replica Down (instance {{ $labels.instance }})"
+        description: "The MySQL exporter or replica is unreachable.\nVALUE = {{ $value }}\nLABELS = {{ $labels }}"
 
 - name: MySQL-SlaveIOThreadDown
   rules:
-  - alert: MySQLSlaveIOThreadDown
-    expr: mysql_slave_status_slave_io_running == 0
-    for: 2m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MySQL Slave IO Thread stopped (instance {{ $labels.instance }})"
-      description: "Replication IO thread stopped on slave {{ $labels.instance }}.\nVALUE = {{ $value }}"
+    - alert: MySQLSlaveIOThreadDown
+      expr: mysql_slave_status_slave_io_running == 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MySQL Slave IO Thread stopped (instance {{ $labels.instance }})"
+        description: "Replication IO thread stopped on slave {{ $labels.instance }}.\nVALUE = {{ $value }}"
 
 - name: MySQL-SlaveSQLThreadDown
   rules:
-  - alert: MySQLSlaveSQLThreadDown
-    expr: mysql_slave_status_slave_sql_running == 0
-    for: 2m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MySQL Slave SQL Thread stopped (instance {{ $labels.instance }})"
-      description: "Replication SQL thread stopped on slave {{ $labels.instance }}.\nVALUE = {{ $value }}"
+    - alert: MySQLSlaveSQLThreadDown
+      expr: mysql_slave_status_slave_sql_running == 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MySQL Slave SQL Thread stopped (instance {{ $labels.instance }})"
+        description: "Replication SQL thread stopped on slave {{ $labels.instance }}.\nVALUE = {{ $value }}"
 
 - name: MySQL-ReplicationLagHigh
   rules:
-  - alert: MySQLReplicationLagHigh
-    expr: mysql_slave_status_seconds_behind_master > 60
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "MySQL Replication Lag High (instance {{ $labels.instance }})"
-      description: "Replication lag is {{ $value }} seconds.\nSlave is falling behind master.\nLABELS = {{ $labels }}"
+    - alert: MySQLReplicationLagHigh
+      expr: mysql_slave_status_seconds_behind_master > 60
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "MySQL Replication Lag High (instance {{ $labels.instance }})"
+        description: "Replication lag is {{ $value }} seconds.\nSlave is falling behind master.\nLABELS = {{ $labels }}"
 
 - name: MySQL-ReplicationError
   rules:
-  - alert: MySQLReplicationError
-    expr: mysql_slave_status_last_errno > 0
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MySQL Replication Error (instance {{ $labels.instance }})"
-      description: "Replication stopped due to an error on slave {{ $labels.instance }}.\nError code: {{ $value }}\nLABELS = {{ $labels }}"
+    - alert: MySQLReplicationError
+      expr: mysql_slave_status_last_errno > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MySQL Replication Error (instance {{ $labels.instance }})"
+        description: "Replication stopped due to an error on slave {{ $labels.instance }}.\nError code: {{ $value }}\nLABELS = {{ $labels }}"
 
 - name: MySQL-SlaveNotConnected
   rules:
-  - alert: MySQLSlaveNotConnected
-    expr: mysql_slave_status_slave_io_running == 0 or mysql_slave_status_slave_sql_running == 0
-    for: 3m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MySQL Slave Disconnected (instance {{ $labels.instance }})"
-      description: "Slave {{ $labels.instance }} lost connection or replication stopped.\nEither IO or SQL thread is not running.\nLABELS = {{ $labels }}"
+    - alert: MySQLSlaveNotConnected
+      expr: mysql_slave_status_slave_io_running == 0 or mysql_slave_status_slave_sql_running == 0
+      for: 3m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MySQL Slave Disconnected (instance {{ $labels.instance }})"
+        description: "Slave {{ $labels.instance }} lost connection or replication stopped.\nEither IO or SQL thread is not running.\nLABELS = {{ $labels }}"
 
 - name: MySQL-ReplicationStoppedForLong
   rules:
-  - alert: MySQLReplicationStoppedForLong
-    expr: increase(mysql_slave_status_seconds_behind_master[10m]) == 0
-    for: 10m
-    labels:
-      severity: warning
-    annotations:
-      summary: "MySQL Replication Appears Stopped (instance {{ $labels.instance }})"
-      description: "No change in replication lag for 10 minutes.\nReplication may be stuck or stopped silently.\nLABELS = {{ $labels }}"
-
+    - alert: MySQLReplicationStoppedForLong
+      expr: increase(mysql_slave_status_seconds_behind_master[10m]) == 0
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "MySQL Replication Appears Stopped (instance {{ $labels.instance }})"
+        description: "No change in replication lag for 10 minutes.\nReplication may be stuck or stopped silently.\nLABELS = {{ $labels }}"
 
 - name: MySQL-BinlogGrowingFast
   rules:
-  - alert: MySQLBinlogGrowingFast
-    expr: rate(mysql_binlog_size_bytes[10m]) > 50000000
-    for: 10m
-    labels:
-      severity: warning
-    annotations:
-      summary: "MySQL Binlog Growing Fast (instance {{ $labels.instance }})"
-      description: "Binlog size increasing more than 50 MB per 10 minutes.\nCheck binlog retention.\nLABELS = {{ $labels }}"
+    - alert: MySQLBinlogGrowingFast
+      expr: rate(mysql_binlog_size_bytes[10m]) > 50000000
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "MySQL Binlog Growing Fast (instance {{ $labels.instance }})"
+        description: "Binlog size increasing more than 50 MB per 10 minutes.\nCheck binlog retention.\nLABELS = {{ $labels }}"
