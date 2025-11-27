@@ -41,6 +41,7 @@ scrape_configs:
 
   - job_name: 'clickhouse'
     static_configs:
+      - targets:
           - 'clickhousecluster-25-6-0.clickhousecluster-25-6.vv-prod.svc.cluster.local:9363'
           - 'clickhousecluster-25-6-1.clickhousecluster-25-6.vv-prod.svc.cluster.local:9363'
           - 'clickhousecluster-25-6-2.clickhousecluster-25-6.vv-prod.svc.cluster.local:9363'
