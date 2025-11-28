@@ -165,11 +165,21 @@ scrape_configs:
         instance: 'windows-server'
 
   - job_name: 'kafka-exporter'
-    static_configs:
-      - targets:
-        - 10.2.4.135:9308
-        - 10.2.4.5:9308
-        - 10.2.4.134:9308
+    kubernetes_sd_configs:
+    - role: pod
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_label_run]
+      regex: kafka-cluster-4-0
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      regex: "9308"
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_ip]
+      target_label: __address__
+      replacement: ${1}:9308
+      action: replace
+    - target_label: component
+      replacement: kafka
   
   - job_name: 'mysql_slave'
     metrics_path: /metrics
