@@ -154,17 +154,6 @@ groups:
       summary: "MySQL Slave Disconnected (instance {{ $labels.instance }})"
       description: "Slave {{ $labels.instance }} lost connection or replication stopped.\nEither IO or SQL thread is not running.\nLABELS = {{ $labels }}"
 
-- name: MySQL-ReplicationStoppedForLong
-  rules:
-  - alert: MySQLReplicationStoppedForLong
-    expr: increase(mysql_slave_status_seconds_behind_master[10m]) == 0
-    for: 10m
-    labels:
-      severity: warning
-    annotations:
-      summary: "MySQL Replication Appears Stopped (instance {{ $labels.instance }})"
-      description: "No change in replication lag for 10 minutes.\nReplication may be stuck or stopped silently.\nLABELS = {{ $labels }}"
-
 
 - name: MySQL-BinlogGrowingFast
   rules:
