@@ -234,3 +234,76 @@ groups:
     annotations:
       summary: "Kafka Consumer Group Stalled"
       description: "Offsets not increasing for 10 minutes while lag is high."
+- name: MariaDB-Down
+  rules:
+  - alert: MariaDBDown
+    expr: mysql_up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MariaDB Down (instance {{ $labels.instance }})"
+      description: "MariaDB instance or exporter is unreachable. VALUE = {{ $value }}"
+
+- name: MariaDB-Replication-SLA
+  rules:
+  - alert: MariaDBReplicationSLAUnhealthy
+    expr: |
+      (mysql_up == 0)
+      OR (mysql_slave_status_slave_io_running == 0)
+      OR (mysql_slave_status_slave_sql_running == 0)
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MariaDB Replication SLA Unhealthy (instance {{ $labels.instance }})"
+      description: |
+        Replication is not healthy.
+        One of the following failed:
+        - DB/Exporter Down
+        - IO Thread Stopped
+        - SQL Thread Stopped
+
+- name: MariaDB-Slave-Disconnected
+  rules:
+  - alert: MariaDBSlaveDisconnected
+    expr: mysql_global_status_slaves_connected == 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MariaDB Slave Disconnected (instance {{ $labels.instance }})"
+      description: "The slave lost connection to master. VALUE = {{ $value }}"
+
+- name: MariaDB-Replication-Lag
+  rules:
+  - alert: MariaDBReplicationLagHigh
+    expr: mysql_slave_status_seconds_behind_master > 60
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MariaDB Replication Lag High (instance {{ $labels.instance }})"
+      description: "Replication lag is {{ $value }} seconds. Slave is falling behind Master."
+
+- name: MariaDB-Replication-Error
+  rules:
+  - alert: MariaDBReplicationError
+    expr: mysql_slave_status_last_errno > 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MariaDB Replication Error (instance {{ $labels.instance }})"
+      description: "Replication halted due to SQL error. Error code = {{ $value }}"
+
+- name: MariaDB-Master-ReadOnly
+  rules:
+  - alert: MariaDBMasterReadOnlyEnabled
+    expr: mysql_global_variables_read_only == 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MariaDB Master in Read-Only Mode (instance {{ $labels.instance }})"
+      description: "Master entered read-only mode. Writes are blocked!"
