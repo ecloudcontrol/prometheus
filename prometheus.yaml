@@ -112,24 +112,54 @@ scrape_configs:
   - job_name: 'mysql-exporter'
     kubernetes_sd_configs:
     - role: pod
-
     relabel_configs:
     - source_labels: [__meta_kubernetes_pod_label_run]
       regex: mysql-slave-8-1
       action: keep
-
     - source_labels: [__meta_kubernetes_pod_container_port_number]
       regex: "9104"
       action: keep
-
     - source_labels: [__meta_kubernetes_pod_ip]
       target_label: __address__
       replacement: ${1}:9104
       action: replace
-
     - target_label: role
       replacement: slave
-        
+
+  - job_name: 'mariadb-master-exporter'
+    kubernetes_sd_configs:
+    - role: pod
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_label_run]
+      regex: mariadb-master-chart-10-11
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      regex: "9104"
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_ip]
+      target_label: __address__
+      replacement: ${1}:9104
+      action: replace
+    - target_label: role
+      replacement: master
+
+  - job_name: 'mariadb-slave-exporter'
+    kubernetes_sd_configs:
+    - role: pod
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_label_run]
+      regex: mariadb-slave-chart-10-11
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      regex: "9104"
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_ip]
+      target_label: __address__
+      replacement: ${1}:9104
+      action: replace
+    - target_label: role
+      replacement: slave
+
   - job_name: 'app_db_health'
     scrape_interval: 15s
     metrics_path: /probe
