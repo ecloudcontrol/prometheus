@@ -170,7 +170,7 @@ groups:
 - name: Kafka-BrokerDown
   rules:
   - alert: KafkaBrokerDown
-    expr: count(kafka_broker_info) < max(kafka_broker_info)
+    expr: (count(kafka_broker_info) < max(kafka_broker_info)) OR on() vector(1)
     for: 2m
     labels:
       severity: critical
@@ -181,7 +181,7 @@ groups:
 - name: Kafka-UnderReplicated
   rules:
   - alert: KafkaUnderReplicatedPartitions
-    expr: sum(kafka_topic_partition_replicas - kafka_topic_partition_in_sync_replica) > 0
+    expr: (sum(kafka_topic_partition_replicas - kafka_topic_partition_in_sync_replica) > 0) OR on() vector(1)
     for: 2m
     labels:
       severity: warning
@@ -192,7 +192,7 @@ groups:
 - name: Kafka-OfflinePartitions
   rules:
   - alert: KafkaOfflinePartitions
-    expr: sum(kafka_topic_partition_leader == -1) > 0
+    expr: (sum(kafka_topic_partition_leader == -1) > 0) OR on() vector(1)
     for: 1m
     labels:
       severity: critical
@@ -203,7 +203,7 @@ groups:
 - name: Kafka-HighLag
   rules:
   - alert: KafkaHighConsumerLag
-    expr: sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 20
+    expr: (sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 20) OR on() vector(1)
     for: 5m
     labels:
       severity: warning
@@ -215,8 +215,9 @@ groups:
   rules:
   - alert: KafkaStalledConsumerGroup
     expr: |
-      sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 50
-      and rate(kafka_consumergroup_current_offset[5m]) <= 0
+      ((sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 50
+        and rate(kafka_consumergroup_current_offset[5m]) <= 0)
+      ) OR on() vector(1)
     for: 10m
     labels:
       severity: critical
