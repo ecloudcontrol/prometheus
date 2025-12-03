@@ -17,12 +17,12 @@ deploy:
     port:
     - 9090
     nodeSelector:
-    nodepool: toplist
-  tolerations:
-    - key: nodepool
-      operator: Equal
-      value: toplist
-      effect: NoSchedule
+      nodepool: toplist
+    tolerations:
+      - key: nodepool
+        operator: Equal
+        value: toplist
+        effect: NoSchedule
 
 volumes:
   - claim: prometheus-data
