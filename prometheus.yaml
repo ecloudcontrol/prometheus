@@ -108,6 +108,22 @@ scrape_configs:
     - target_label: component
       replacement: kafka
 
+  - job_name: 'kafka-jmx'
+    kubernetes_sd_configs:
+    - role: pod
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_label_run]
+      regex: kafka-cluster-4-0
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      regex: "9404"
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_ip]
+      target_label: __address__
+      replacement: ${1}:9404
+      action: replace
+    - target_label: component
+      replacement: kafka-jmx
 
   - job_name: 'mysql-exporter'
     kubernetes_sd_configs:
