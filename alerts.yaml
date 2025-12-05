@@ -170,7 +170,7 @@ groups:
 - name: Kafka-BrokerDown
   rules:
   - alert: KafkaBrokerDown
-    expr: (count(kafka_broker_info) < max(kafka_broker_info)) OR on() vector(1)
+    expr: count(kafka_broker_info) < max(kafka_broker_info)
     for: 2m
     labels:
       severity: critical
@@ -181,7 +181,7 @@ groups:
 - name: Kafka-UnderReplicated
   rules:
   - alert: KafkaUnderReplicatedPartitions
-    expr: (sum(kafka_topic_partition_replicas - kafka_topic_partition_in_sync_replica) > 0) OR on() vector(1)
+    expr: sum(kafka_topic_partition_replicas - kafka_topic_partition_in_sync_replica) > 0
     for: 2m
     labels:
       severity: warning
@@ -192,7 +192,7 @@ groups:
 - name: Kafka-OfflinePartitions
   rules:
   - alert: KafkaOfflinePartitions
-    expr: (sum(kafka_topic_partition_leader == -1) > 0) OR on() vector(1)
+    expr: sum(kafka_topic_partition_leader == -1) > 0
     for: 1m
     labels:
       severity: critical
@@ -203,7 +203,7 @@ groups:
 - name: Kafka-HighLag
   rules:
   - alert: KafkaHighConsumerLag
-    expr: (sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 20) OR on() vector(1)
+    expr: sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 20
     for: 5m
     labels:
       severity: warning
@@ -215,85 +215,155 @@ groups:
   rules:
   - alert: KafkaStalledConsumerGroup
     expr: |
-      ((sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 50
-        and rate(kafka_consumergroup_current_offset[5m]) <= 0)
-      ) OR on() vector(1)
+      sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 50
+      and rate(kafka_consumergroup_current_offset[5m]) <= 0
     for: 10m
     labels:
       severity: critical
     annotations:
       summary: "Kafka Consumer Group Stalled"
       description: "Offsets not increasing for 10 minutes while lag is high."
-- name: MariaDB-Down
+
+- name: MariaDB-Health
   rules:
+
   - alert: MariaDBDown
-    expr: mysql_up == 0
+    expr: mysql_up{job=~"mariadb-.*-exporter"} == 0
     for: 1m
     labels:
       severity: critical
     annotations:
-      summary: "MariaDB Down (instance {{ $labels.instance }})"
-      description: "MariaDB instance or exporter is unreachable. VALUE = {{ $value }}"
+      summary: "MariaDB Down ({{ $labels.instance }})"
+      description: "MariaDB instance or exporter is unreachable."
 
-- name: MariaDB-Replication-SLA
-  rules:
   - alert: MariaDBReplicationSLAUnhealthy
     expr: |
-      (mysql_up == 0)
-      OR (mysql_slave_status_slave_io_running == 0)
-      OR (mysql_slave_status_slave_sql_running == 0)
+      (mysql_up{job=~"mariadb-.*-exporter"} == 0)
+      OR (mysql_slave_status_slave_io_running{job="mariadb-slave-exporter"} == 0)
+      OR (mysql_slave_status_slave_sql_running{job="mariadb-slave-exporter"} == 0)
     for: 2m
     labels:
       severity: critical
     annotations:
-      summary: "MariaDB Replication SLA Unhealthy (instance {{ $labels.instance }})"
+      summary: "MariaDB Replication SLA Unhealthy"
       description: |
-        Replication is not healthy.
-        One of the following failed:
-        - DB/Exporter Down
-        - IO Thread Stopped
-        - SQL Thread Stopped
+        Replication issue detected:
+        - Exporter down
+        - IO Thread stopped
+        - SQL Thread stopped
 
-- name: MariaDB-Slave-Disconnected
-  rules:
   - alert: MariaDBSlaveDisconnected
-    expr: mysql_global_status_slaves_connected == 0
+    expr: mysql_global_status_slaves_connected{job="mariadb-master-exporter"} == 0
     for: 3m
     labels:
       severity: critical
     annotations:
-      summary: "MariaDB Slave Disconnected (instance {{ $labels.instance }})"
-      description: "The slave lost connection to master. VALUE = {{ $value }}"
+      summary: "MariaDB Slave Disconnected ({{ $labels.instance }})"
+      description: "Slave is no longer connected to the Master."
 
-- name: MariaDB-Replication-Lag
-  rules:
   - alert: MariaDBReplicationLagHigh
-    expr: mysql_slave_status_seconds_behind_master > 60
+    expr: mysql_slave_status_seconds_behind_master{job="mariadb-slave-exporter"} > 60
     for: 5m
     labels:
       severity: critical
     annotations:
-      summary: "MariaDB Replication Lag High (instance {{ $labels.instance }})"
-      description: "Replication lag is {{ $value }} seconds. Slave is falling behind Master."
+      summary: "MariaDB Replication Lag High ({{ $labels.instance }})"
+      description: |
+        Slave is {{ $value }} seconds behind master.
 
-- name: MariaDB-Replication-Error
-  rules:
   - alert: MariaDBReplicationError
-    expr: mysql_slave_status_last_errno > 0
+    expr: mysql_slave_status_last_errno{job="mariadb-slave-exporter"} > 0
     for: 1m
     labels:
       severity: critical
     annotations:
-      summary: "MariaDB Replication Error (instance {{ $labels.instance }})"
-      description: "Replication halted due to SQL error. Error code = {{ $value }}"
+      summary: "MariaDB Replication SQL Error ({{ $labels.instance }})"
+      description: |
+        SQL thread encountered an error. Code: {{ $value }}
 
-- name: MariaDB-Master-ReadOnly
-  rules:
   - alert: MariaDBMasterReadOnlyEnabled
-    expr: mysql_global_variables_read_only == 1
+    expr: mysql_global_variables_read_only{job="mariadb-master-exporter"} == 1
     for: 1m
     labels:
       severity: critical
     annotations:
-      summary: "MariaDB Master in Read-Only Mode (instance {{ $labels.instance }})"
-      description: "Master entered read-only mode. Writes are blocked!"
+      summary: "MariaDB Master in Read-Only Mode ({{ $labels.instance }})"
+      description: |
+        Master entered read-only mode — Writes will fail.
+
+- name: Kafka-JVMHighHeap
+  rules:
+  - alert: KafkaHighJVMHeapUsage
+    expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) * 100 > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Kafka JVM Heap Usage High"
+      description: "Heap usage is above 80% for {{ $labels.instance }}. Current usage: {{ $value }}%"
+
+- name: Kafka-JVMHeapCritical
+  rules:
+  - alert: KafkaJVMHeapCritical
+    expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) * 100 > 90
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Kafka JVM Heap Critical"
+      description: "Heap nearing full on {{ $labels.instance }}. May cause OOM or GC pauses."
+
+- name: Kafka-ThreadLeak
+  rules:
+  - alert: KafkaHighThreadCount
+    expr: jvm_threads_count > 300
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Kafka Thread Count High"
+      description: "Thread count increased abnormally on {{ $labels.instance }}. May indicate thread leak."
+
+- name: Kafka-HighMemoryUsage
+  rules:
+  - alert: KafkaHighMemoryUsage
+    expr: process_resident_memory_bytes / 8e+9 * 100 > 90
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Kafka Memory Usage Critical"
+      description: "Kafka broker memory usage >90% on {{ $labels.instance }}."
+
+- name: Kafka-HighCPU
+  rules:
+  - alert: KafkaHighCPUUsage
+    expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Kafka CPU Usage High"
+      description: "CPU usage above 80% for {{ $labels.instance }}."
+
+- name: Kafka-GCHigh
+  rules:
+  - alert: KafkaHighGCPause
+    expr: rate(jvm_gc_collection_seconds_sum[5m]) > 0.2
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Kafka GC Pause Time High"
+      description: "GC pause time >200ms/sec on {{ $labels.instance }} — may cause latency spikes."
+
+- name: Kafka-NoController
+  rules:
+  - alert: KafkaNoActiveController
+    expr: kafka_controller_activecontrollercount != 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Kafka Active Controller Missing"
+      description: "No Active Controller detected — cluster will not elect leaders!"
