@@ -1,15 +1,19 @@
 groups:
 
+# ==========================================================
+# SYSTEM / NODE HEALTH
+# ==========================================================
 - name: system-health
   rules:
+
     - alert: HostHighCpuLoad
       expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 90
       for: 3m
       labels:
         severity: warning
       annotations:
-        summary: Host high CPU load (instance {{ $labels.instance }})
-        description: "CPU load > 90%\nVALUE = {{ $value }}"
+        summary: "Host high CPU load ({{ $labels.instance }})"
+        description: "CPU load > 90%. VALUE = {{ $value }}"
 
     - alert: LowDataDiskSpace
       expr: ceil(((node_filesystem_size_bytes{mountpoint!="/boot"} - node_filesystem_free_bytes{mountpoint!="/boot"}) / node_filesystem_size_bytes{mountpoint!="/boot"} * 100)) > 95
@@ -17,7 +21,7 @@ groups:
         severity: critical
       annotations:
         summary: "Low disk space on {{ $labels.instance }}"
-        description: "Partition: {{ $labels.mountpoint }}, Usage: {{ humanize $value }}%"
+        description: "Partition {{ $labels.mountpoint }} at {{ $value }}% usage."
 
     - alert: HostOutOfMemory
       expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 8
@@ -25,17 +29,18 @@ groups:
       labels:
         severity: warning
       annotations:
-        summary: Host out of memory (instance {{ $labels.instance }})
-        description: "Available memory < 8%\nVALUE = {{ $value }}"
+        summary: "Host out of memory ({{ $labels.instance }})"
+        description: "Available memory < 8%. VALUE = {{ $value }}"
 
     - alert: HostOutOfDiskSpace
-      expr: (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 10 and ON(instance, device, mountpoint) node_filesystem_readonly == 0
+      expr: (node_filesystem_avail_bytes * 100 / node_filesystem_size_bytes) < 10
+        and ON(instance, device, mountpoint) node_filesystem_readonly == 0
       for: 5m
       labels:
         severity: warning
       annotations:
-        summary: Low disk space (instance {{ $labels.instance }})
-        description: "Disk space < 10%\nAvailable = {{ $value }}%"
+        summary: "Low disk space ({{ $labels.instance }})"
+        description: "Available disk < 10%. VALUE = {{ $value }}"
 
     - alert: HighNodeCPU
       expr: rate(node_load15[5m]) * 100 > 80
@@ -43,11 +48,16 @@ groups:
       labels:
         severity: warning
       annotations:
-        summary: High 15m CPU load ({{ $labels.instance }})
-        description: "Load average > 80%\nVALUE = {{ $value }}"
+        summary: "High 15m CPU load ({{ $labels.instance }})"
+        description: "Load AVG > 80. VALUE = {{ $value }}"
 
+
+# ==========================================================
+# NETWORK PROBES (BLACKBOX)
+# ==========================================================
 - name: network-probes
   rules:
+
     - alert: SiteDown
       expr: probe_success == 0
       for: 30s
@@ -55,7 +65,7 @@ groups:
         severity: critical
       annotations:
         summary: "Site down: {{ $labels.instance }}"
-        description: "Blackbox TCP probe failed (possibly VPN or network down)"
+        description: "Blackbox probe failed."
 
     - alert: HTTP200Fail
       expr: probe_http_status_code != 200
@@ -64,7 +74,7 @@ groups:
         severity: critical
       annotations:
         summary: "HTTP 200 check failed"
-        description: "Expected HTTP 200, got {{ $value }} from {{ $labels.instance }}"
+        description: "Expected 200, got {{ $value }}."
 
     - alert: MySQLPortDown
       expr: probe_success{instance=~"mysql-.*"} == 0
@@ -72,228 +82,293 @@ groups:
       labels:
         severity: critical
       annotations:
-        summary: "MySQL down on {{ $labels.instance }}"
-        description: "TCP connection to MySQL port 3306 failed (likely VPN issue)"
+        summary: "MySQL TCP Port Down ({{ $labels.instance }})"
+        description: "MySQL port unreachable."
 
+
+# ==========================================================
+# PVC USAGE
+# ==========================================================
 - name: PVC-usage
   rules:
-  - alert: PVCHighUsage
-    expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) * 100 > 70
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: PVC high usage (namespace {{ $labels.namespace }}, claim {{ $labels.persistentvolumeclaim }})
-      description: |-
-        Description: PVC usage > 70%
-        VALUE = {{ $value }}%
 
+    - alert: PVCHighUsage
+      expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) * 100 > 70
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "PVC high usage ({{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }})"
+        description: "PVC usage > 70%. VALUE = {{ $value }}%"
+
+
+# ==========================================================
+# MYSQL GENERIC ALERTS
+# ==========================================================
 - name: MySQL-ReplicaDown
   rules:
-  - alert: MySQLReplicaDown
-    expr: mysql_up == 0
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MySQL Replica Down (instance {{ $labels.instance }})"
-      description: "The MySQL exporter or replica is unreachable.\nVALUE = {{ $value }}\nLABELS = {{ $labels }}"
 
-- name: MySQL-SlaveIOThreadDown
+    - alert: MySQLReplicaDown
+      expr: mysql_up == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MySQL Down ({{ $labels.instance }})"
+        description: "Exporter or DB unreachable."
+
+
+# ==========================================================
+# MYSQL SLAVE THREAD STATUS
+# ==========================================================
+- name: MySQL-Slave-Threads
   rules:
-  - alert: MySQLSlaveIOThreadDown
-    expr: mysql_slave_status_slave_io_running == 0
-    for: 2m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MySQL Slave IO Thread stopped (instance {{ $labels.instance }})"
-      description: "Replication IO thread stopped on slave {{ $labels.instance }}.\nVALUE = {{ $value }}"
 
-- name: MySQL-SlaveSQLThreadDown
+    - alert: MySQLSlaveIOThreadDown
+      expr: mysql_slave_status_slave_io_running == 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MySQL Slave IO Thread stopped ({{ $labels.instance }})"
+        description: "I/O thread stopped."
+
+    - alert: MySQLSlaveSQLThreadDown
+      expr: mysql_slave_status_slave_sql_running == 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MySQL Slave SQL Thread stopped ({{ $labels.instance }})"
+        description: "SQL thread stopped."
+
+
+# ==========================================================
+# MYSQL LAG / ERROR
+# ==========================================================
+- name: MySQL-Replication
   rules:
-  - alert: MySQLSlaveSQLThreadDown
-    expr: mysql_slave_status_slave_sql_running == 0
-    for: 2m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MySQL Slave SQL Thread stopped (instance {{ $labels.instance }})"
-      description: "Replication SQL thread stopped on slave {{ $labels.instance }}.\nVALUE = {{ $value }}"
 
-- name: MySQL-ReplicationLagHigh
+    - alert: MySQLReplicationLagHigh
+      expr: mysql_slave_status_seconds_behind_master > 60
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Replication Lag High ({{ $labels.instance }})"
+        description: "Lag: {{ $value }} seconds."
+
+    - alert: MySQLReplicationError
+      expr: mysql_slave_status_last_errno > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Replication Error ({{ $labels.instance }})"
+        description: "Error code: {{ $value }}"
+
+    - alert: MySQLSlaveNotConnected
+      expr: mysql_slave_status_slave_io_running == 0 OR mysql_slave_status_slave_sql_running == 0
+      for: 3m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Slave disconnected ({{ $labels.instance }})"
+        description: "I/O or SQL thread not running."
+
+
+# ==========================================================
+# MYSQL BINLOG
+# ==========================================================
+- name: MySQL-Binlog
   rules:
-  - alert: MySQLReplicationLagHigh
-    expr: mysql_slave_status_seconds_behind_master > 60
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "MySQL Replication Lag High (instance {{ $labels.instance }})"
-      description: "Replication lag is {{ $value }} seconds.\nSlave is falling behind master.\nLABELS = {{ $labels }}"
 
-- name: MySQL-ReplicationError
+    - alert: MySQLBinlogGrowingFast
+      expr: rate(mysql_binlog_size_bytes[10m]) > 50e6
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Binlog Growing Fast ({{ $labels.instance }})"
+        description: "Growing >50MB/10m."
+
+
+# ==========================================================
+# MARIADB HEALTH & REPLICATION
+# ==========================================================
+- name: MariaDB-Health
   rules:
-  - alert: MySQLReplicationError
-    expr: mysql_slave_status_last_errno > 0
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MySQL Replication Error (instance {{ $labels.instance }})"
-      description: "Replication stopped due to an error on slave {{ $labels.instance }}.\nError code: {{ $value }}\nLABELS = {{ $labels }}"
 
-- name: MySQL-SlaveNotConnected
+    - alert: MariaDBDown
+      expr: mysql_up{job=~"mariadb-.*-exporter"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MariaDB Down ({{ $labels.instance }})"
+        description: "Exporter or DB unavailable."
+
+    - alert: MariaDBReplicationSLAUnhealthy
+      expr: |
+        (mysql_up{job=~"mariadb-.*-exporter"} == 0)
+        OR (mysql_slave_status_slave_io_running{job="mariadb-slave-exporter"} == 0)
+        OR (mysql_slave_status_slave_sql_running{job="mariadb-slave-exporter"} == 0)
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Replication SLA Unhealthy"
+        description: "Exporter down or threads stopped."
+
+    - alert: MariaDBSlaveDisconnected
+      expr: mysql_global_status_slaves_connected{job="mariadb-master-exporter"} == 0
+      for: 3m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Slave disconnected from Master"
+        description: "Master shows 0 slaves connected."
+
+    - alert: MariaDBReplicationLagHigh
+      expr: mysql_slave_status_seconds_behind_master{job="mariadb-slave-exporter"} > 60
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MariaDB Replication Lag High ({{ $labels.instance }})"
+        description: "Lag: {{ $value }} seconds."
+
+    - alert: MariaDBReplicationError
+      expr: mysql_slave_status_last_errno{job="mariadb-slave-exporter"} > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MariaDB Replication Error"
+        description: "SQL error code: {{ $value }}."
+
+    - alert: MariaDBMasterReadOnlyEnabled
+      expr: mysql_global_variables_read_only{job="mariadb-master-exporter"} == 1
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Master in READ ONLY mode"
+        description: "Writes will fail!"
+
+
+# ==========================================================
+# KAFKA HEALTH
+# ==========================================================
+- name: Kafka-Health
   rules:
-  - alert: MySQLSlaveNotConnected
-    expr: mysql_slave_status_slave_io_running == 0 or mysql_slave_status_slave_sql_running == 0
-    for: 3m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MySQL Slave Disconnected (instance {{ $labels.instance }})"
-      description: "Slave {{ $labels.instance }} lost connection or replication stopped.\nEither IO or SQL thread is not running.\nLABELS = {{ $labels }}"
 
+    - alert: KafkaBrokerDown
+      expr: count(kafka_broker_info) < max(kafka_broker_info)
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Kafka Broker Down"
+        description: "One or more brokers unreachable."
 
-- name: MySQL-BinlogGrowingFast
-  rules:
-  - alert: MySQLBinlogGrowingFast
-    expr: rate(mysql_binlog_size_bytes[10m]) > 50000000
-    for: 10m
-    labels:
-      severity: warning
-    annotations:
-      summary: "MySQL Binlog Growing Fast (instance {{ $labels.instance }})"
-      description: "Binlog size increasing more than 50 MB per 10 minutes.\nCheck binlog retention.\nLABELS = {{ $labels }}"
+    - alert: KafkaUnderReplicatedPartitions
+      expr: sum(kafka_topic_partition_replicas - kafka_topic_partition_in_sync_replica) > 0
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Under Replicated Partitions"
+        description: "ISR < Replicas."
 
+    - alert: KafkaOfflinePartitions
+      expr: sum(kafka_topic_partition_leader == -1) > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Offline Partitions"
+        description: "No leader assigned."
 
-- name: Kafka-BrokerDown
-  rules:
-  - alert: KafkaBrokerDown
-    expr: (count(kafka_broker_info) < max(kafka_broker_info)) OR on() vector(1)
-    for: 2m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Kafka Broker Down"
-      description: "One or more brokers are down or unreachable."
+    - alert: KafkaHighConsumerLag
+      expr: sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 20
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High Consumer Lag"
+        description: "Lag: {{ $value }} messages."
 
-- name: Kafka-UnderReplicated
-  rules:
-  - alert: KafkaUnderReplicatedPartitions
-    expr: (sum(kafka_topic_partition_replicas - kafka_topic_partition_in_sync_replica) > 0) OR on() vector(1)
-    for: 2m
-    labels:
-      severity: warning
-    annotations:
-      summary: "Kafka Under Replicated Partitions"
-      description: "Some partitions do not have enough in-sync replicas (ISR < Replicas)."
+    - alert: KafkaStalledConsumerGroup
+      expr: |
+        sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 50
+        AND rate(kafka_consumergroup_current_offset[5m]) <= 0
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Stalled Consumer Group"
+        description: "Offsets not increasing."
 
-- name: Kafka-OfflinePartitions
-  rules:
-  - alert: KafkaOfflinePartitions
-    expr: (sum(kafka_topic_partition_leader == -1) > 0) OR on() vector(1)
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Kafka Offline Partitions"
-      description: "No leader for some partitions. Reads/Writes blocked."
+    - alert: KafkaHighJVMHeapUsage
+      expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) * 100 > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High JVM Heap Usage"
+        description: "Heap > 80%."
 
-- name: Kafka-HighLag
-  rules:
-  - alert: KafkaHighConsumerLag
-    expr: (sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 20) OR on() vector(1)
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "High Kafka Consumer Lag"
-      description: "Consumers are falling behind. Total lag: {{ $value }} messages."
+    - alert: KafkaJVMHeapCritical
+      expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) * 100 > 90
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Critical JVM Heap"
+        description: "Heap > 90%."
 
-- name: Kafka-ConsumerStalled
-  rules:
-  - alert: KafkaStalledConsumerGroup
-    expr: |
-      ((sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 50
-        and rate(kafka_consumergroup_current_offset[5m]) <= 0)
-      ) OR on() vector(1)
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Kafka Consumer Group Stalled"
-      description: "Offsets not increasing for 10 minutes while lag is high."
-- name: MariaDB-Down
-  rules:
-  - alert: MariaDBDown
-    expr: mysql_up == 0
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MariaDB Down (instance {{ $labels.instance }})"
-      description: "MariaDB instance or exporter is unreachable. VALUE = {{ $value }}"
+    - alert: KafkaHighThreadCount
+      expr: jvm_threads_count > 300
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High Thread Count"
+        description: "Possible thread leak."
 
-- name: MariaDB-Replication-SLA
-  rules:
-  - alert: MariaDBReplicationSLAUnhealthy
-    expr: |
-      (mysql_up == 0)
-      OR (mysql_slave_status_slave_io_running == 0)
-      OR (mysql_slave_status_slave_sql_running == 0)
-    for: 2m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MariaDB Replication SLA Unhealthy (instance {{ $labels.instance }})"
-      description: |
-        Replication is not healthy.
-        One of the following failed:
-        - DB/Exporter Down
-        - IO Thread Stopped
-        - SQL Thread Stopped
+    - alert: KafkaHighMemoryUsage
+      expr: process_resident_memory_bytes / 8e9 * 100 > 90
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High Kafka Memory Usage"
+        description: ">90% memory used."
 
-- name: MariaDB-Slave-Disconnected
-  rules:
-  - alert: MariaDBSlaveDisconnected
-    expr: mysql_global_status_slaves_connected == 0
-    for: 3m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MariaDB Slave Disconnected (instance {{ $labels.instance }})"
-      description: "The slave lost connection to master. VALUE = {{ $value }}"
+    - alert: KafkaHighCPUUsage
+      expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High Kafka CPU"
+        description: ">80% CPU."
 
-- name: MariaDB-Replication-Lag
-  rules:
-  - alert: MariaDBReplicationLagHigh
-    expr: mysql_slave_status_seconds_behind_master > 60
-    for: 5m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MariaDB Replication Lag High (instance {{ $labels.instance }})"
-      description: "Replication lag is {{ $value }} seconds. Slave is falling behind Master."
+    - alert: KafkaHighGCPause
+      expr: rate(jvm_gc_collection_seconds_sum[5m]) > 0.2
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High GC Pause"
+        description: ">200ms/sec GC pauses."
 
-- name: MariaDB-Replication-Error
-  rules:
-  - alert: MariaDBReplicationError
-    expr: mysql_slave_status_last_errno > 0
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MariaDB Replication Error (instance {{ $labels.instance }})"
-      description: "Replication halted due to SQL error. Error code = {{ $value }}"
-
-- name: MariaDB-Master-ReadOnly
-  rules:
-  - alert: MariaDBMasterReadOnlyEnabled
-    expr: mysql_global_variables_read_only == 1
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MariaDB Master in Read-Only Mode (instance {{ $labels.instance }})"
-      description: "Master entered read-only mode. Writes are blocked!"
+    - alert: KafkaNoActiveController
+      expr: kafka_controller_activecontrollercount != 1
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "No Active Controller"
+        description: "Cluster cannot elect leaders!"
