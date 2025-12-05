@@ -158,7 +158,9 @@ scrape_configs:
       action: replace
     - target_label: role
       replacement: master
-
+    - target_label: instance_name
+      replacement: mariadb-master
+      
   - job_name: 'mariadb-slave-exporter'
     kubernetes_sd_configs:
     - role: pod
@@ -175,6 +177,8 @@ scrape_configs:
       action: replace
     - target_label: role
       replacement: slave
+    - target_label: instance_name
+      replacement: mariadb-slave
 
   - job_name: 'app_db_health'
     scrape_interval: 15s
