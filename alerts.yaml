@@ -228,7 +228,7 @@ groups:
   rules:
 
   - alert: MariaDBDown
-    expr: mysql_up{job=~"mariadb-*-exporter"} == 0
+    expr: mysql_up{job=~"mariadb-.*-exporter"} == 0
     for: 1m
     labels:
       severity: critical
@@ -238,7 +238,7 @@ groups:
 
   - alert: MariaDBReplicationSLAUnhealthy
     expr: |
-      (mysql_up{job=~"mariadb-*-exporter"} == 0)
+      (mysql_up{job=~"mariadb-.*-exporter"} == 0)
       OR (mysql_slave_status_slave_io_running{job="mariadb-slave-exporter"} == 0)
       OR (mysql_slave_status_slave_sql_running{job="mariadb-slave-exporter"} == 0)
     for: 2m
