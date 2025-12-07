@@ -281,6 +281,18 @@ groups:
       description: |
         SQL thread encountered an error. Code: {{ $value }}
 
+  - alert: MariaDBReplicationRecovered
+    expr: |
+      mysql_global_status_slaves_connected > 0
+      and mysql_slave_status_slave_io_running == 1
+      and mysql_slave_status_slave_sql_running == 1
+    for: 3m
+    labels:
+      severity: info
+    annotations:
+      summary: "✅ MariaDB Replication Recovered"
+      description: "Replication is healthy again on {{ $labels.instance }}"
+
   - alert: MariaDBMasterReadOnlyEnabled
     expr: mysql_global_variables_read_only{job="mariadb-master-exporter"} == 1
     for: 1m
