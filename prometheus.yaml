@@ -133,7 +133,7 @@ scrape_configs:
   ####################################
   # KAFKA JMX
   ####################################
-  - job_name: 'kafka-jmx'
+  - job_name: 'kafka_jmx'
     kubernetes_sd_configs:
       - role: pod
     relabel_configs:
