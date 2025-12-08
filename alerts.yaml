@@ -372,7 +372,7 @@ groups:
 - name: Kafka-NoController
   rules:
   - alert: KafkaNoActiveController
-    expr: kafka_controller_activecontrollercount != 1
+    expr: sum(kafka_controller_activecontrollercount) != 1
     for: 1m
     labels:
       severity: critical
