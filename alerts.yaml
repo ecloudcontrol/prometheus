@@ -170,7 +170,12 @@ groups:
 - name: Kafka-BrokerDown
   rules:
   - alert: KafkaBrokerDown
-    expr: count(kafka_broker_info) < count by () (max by (id) (kafka_broker_info))
+    expr: |
+      count by () (max by (id) (kafka_broker_info))
+      <
+      max_over_time(
+        count by () (max by (id) (kafka_broker_info))[5m:]
+      )
     for: 2m
     labels:
       severity: critical
