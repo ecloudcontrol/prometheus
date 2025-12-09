@@ -180,6 +180,63 @@ scrape_configs:
       action: replace
     - target_label: component
       replacement: kafka
+ 
+  - job_name: 'kafka_jmx'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_label_run]
+      regex: kafka-cluster-4-0
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      regex: "9404"
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_ip]
+      target_label: __address__
+      replacement: ${1}:9404
+      action: replace
+    - target_label: component
+      replacement: kafka-jmx
+
+  - job_name: 'mariadb-master-exporter'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_label_run]
+      regex: mariadb-master-chart-10-11
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      regex: "9104"
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_ip]
+      target_label: __address__
+      replacement: ${1}:9104
+      action: replace
+    - target_label: instance
+      replacement: mariadb-master
+    - target_label: role
+      replacement: master
+
+  - job_name: 'mariadb-slave-exporter'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_label_run]
+      regex: mariadb-slave-chart-10-11
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      regex: "9104"
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_ip]
+      target_label: __address__
+      replacement: ${1}:9104
+      action: replace
+    - target_label: slave_id
+      replacement: mariadb-slave-10-11
+    - target_label: instance
+      replacement: mariadb-slave-10-11
+    - target_label: role
+      replacement: slave
   
   - job_name: 'mysql_slave'
     metrics_path: /metrics
