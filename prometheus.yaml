@@ -39,6 +39,7 @@ scrape_configs:
           - 192.168.148.11:9100
           - 192.168.140.249:9100
           - 192.168.140.248:9100
+          - 192.168.186.244:9100
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.130.209:9100
@@ -116,6 +117,10 @@ scrape_configs:
         regex: 192.168.140.249:9100
         target_label: nodename
         replacement: Ti-prod-worker-7
+      - source_labels: [__address__]
+        regex: 192.168.186.244:9100
+        target_label: nodename
+        replacement: pricealerts-node-0
       
       
   - job_name: 'kube-state-metrics'
