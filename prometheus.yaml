@@ -195,7 +195,7 @@ scrape_configs:
       replacement: master
 
   ####################################
-  # MARIADB SLAVE EXPORTER (mariadb-slave-10-11)
+  # MARIADB SLAVE EXPORTER (mariadb-slave)
   ####################################
   - job_name: 'mariadb-slave-exporter'
     kubernetes_sd_configs:
@@ -212,9 +212,9 @@ scrape_configs:
       replacement: ${1}:9104
       action: replace
     - target_label: slave_id
-      replacement: mariadb-slave-10-11
+      replacement: mariadb-slave
     - target_label: instance
-      replacement: mariadb-slave-10-11
+      replacement: mariadb-slave
     - target_label: role
       replacement: slave
 
@@ -249,3 +249,5 @@ scrape_configs:
     relabel_configs:
       - action: labelmap
         regex: __meta_kubernetes_node_label_(.+)
+
+
