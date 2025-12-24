@@ -177,6 +177,27 @@ groups:
         host: "{{ $labels.instance }}"
         title: "Network Errors"
 
+- name: Windows-Availability
+  rules:
+    - alert: WindowsServerDown
+      expr: up{job="windows_server"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Windows Server DOWN (instance {{ $labels.instance }})"
+        description: "Windows exporter is not reachable. Server may have rebooted or crashed."
+        host: "{{ $labels.instance }}"
+        title: "Windows Server Down"
+
+    - alert: WindowsUnexpectedReboot
+      expr: changes(windows_system_boot_time_seconds[10m]) > 0
+      labels:
+        severity: critical
+      annotations:
+        summary: "Windows Server Rebooted (instance {{ $labels.instance }})"
+        description: "Windows system reboot detected within last 10 minutes."
+  
 - name: MySQL-ReplicaDown
   rules:
     - alert: MySQLReplicaDown
