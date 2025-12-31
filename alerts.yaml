@@ -75,16 +75,6 @@ groups:
         summary: "MySQL down on {{ $labels.instance }}"
         description: "TCP connection to MySQL port 3306 failed (likely VPN issue)"
 
-- name: High-Pod-CPU
-  rules:
-    - alert: HighPodCPU
-      expr: avg(rate(container_cpu_usage_seconds_total{namespace!="",image!="",container_name!="POD"}[5m])*100) by (pod,namespace) > 100
-      for: 5m
-      labels:
-        severity: warning
-      annotations:
-        summary: HighCpuUsage
-        description: "Pod cpu average value : {{ $value | printf \"%.2f\" }}"
 
 - name: PVC-usage
   rules:
