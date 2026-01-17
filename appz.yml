@@ -16,7 +16,14 @@ deploy:
     replicas: 1
     port:
     - 9090
-
+    nodeSelector:
+      nodepool: clickhouse
+    tolerations:
+      - key: nodepool
+        operator: Equal
+        value: clickhouse
+        effect: NoSchedule
+        
 volumes:
   - claim: prometheus-data
     class: linode-block-storage
