@@ -45,6 +45,7 @@ scrape_configs:
           - '192.168.167.33:9100'
           - '192.168.130.243:9100'
           - '192.168.199.203:9100'
+          - '192.168.150.194:9100'
     metric_relabel_configs:
       - source_labels: ['nodename']
         regex: '(vv.master)'
