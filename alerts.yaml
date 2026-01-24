@@ -3,7 +3,7 @@ groups:
 - name: Cpu-usage
   rules:
   - alert: HostHighCpuLoad
-    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 95
+    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle", instance!="192.168.150.194:9100"}[2m])) * 100) > 95
     for: 3m
     labels:
       severity: warning
@@ -58,4 +58,68 @@ groups:
     annotations:
       summary: "High CPU load (instance {{ $labels.instance }})"
       description: "CPU load is high\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+- name: ClickHouse-Disk
+  rules:
+  - alert: ClickHouseDiskSpaceLow
+    expr: (ClickHouseAsyncMetrics_FilesystemMainPathAvailableBytes / ClickHouseAsyncMetrics_FilesystemMainPathTotalBytes) < 0.15
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse disk space critically low (instance {{ $labels.instance }})"
+      description: "Free disk space < 15%\nVALUE = {{ $value }}\nLABELS = {{ $labels }}"
+
+- name: ClickHouse-Memory
+  rules:
+  - alert: ClickHouseMemoryHigh
+    expr: (ClickHouseAsyncMetrics_MemoryResident / ClickHouseAsyncMetrics_OSMemoryTotal) > 0.85
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "ClickHouse memory usage high (instance {{ $labels.instance }})"
+      description: "Memory usage > 85%\nVALUE = {{ $value }}\nLABELS = {{ $labels }}"
+
+- name: ClickHouse-Connections
+  rules:
+  - alert: ClickHouseRejectingConnections
+    expr: (ClickHouseAsyncMetrics_HTTPRejectedConnections + ClickHouseAsyncMetrics_TCPRejectedConnections) > 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse is rejecting client connections (instance {{ $labels.instance }})"
+      description: "Rejected connections detected (> 0)\nVALUE = {{ $value }}"
+
+- name: ClickHouse-Queries
+  rules:
+  - alert: ClickHouseTooManyConcurrentQueries
+    expr: ClickHouseMetrics_Query > 50
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Too many concurrent queries (instance {{ $labels.instance }})"
+      description: "Concurrent queries > 50\nVALUE = {{ $value }}"
+
+  - alert: ClickHouseQueryQueueOverload
+    expr: ClickHouseMetrics_QueryPending > 20
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse query queue overload (instance {{ $labels.instance }})"
+      description: "Pending queries > 20 (queries waiting in queue)\nVALUE = {{ $value }}"
+
+- name: ClickHouse-ZooKeeper
+  rules:
+  - alert: ClickHouseZooKeeperSessionLost
+    expr: ClickHouseMetrics_ZooKeeperSession != 1
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse ZooKeeper session lost"
+      description: "ZooKeeper session state != 1\nVALUE = {{ $value }}"          
       
