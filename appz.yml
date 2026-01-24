@@ -1,24 +1,32 @@
 app:
     name: prometheus
     code: prometheus
-    notify: appzdev@cloudbourne.com
+    notify: kullas@maximaconsulting.com
 
 build:
-    version: 2.17
-    env: DEV
+    version: 2.54
+    env: PROD
     build_file: none
     output_files: output/*.zip
-    image_template: prometheus-2.45
+    image_template: prometheus-2.54
 
 deploy:
-    context: alpha/DEV
+    context: alpha/PROD
     type: statefulset
     replicas: 1
     port:
     - 9090
-
+    nodeSelector:
+      nodepool: cloudorbit
+    tolerations:
+      - key: nodepool
+        operator: Equal
+        value: cloudorbit
+        effect: NoSchedule
+        
 volumes:
   - claim: prometheus-data
+    class: linode-block-storage
     mount: /appz/data
     name: data
     size: 50Gi
@@ -26,5 +34,5 @@ volumes:
     
   
 properties:
-    revision : 96
+    revision : 1
     
