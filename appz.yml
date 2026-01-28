@@ -17,11 +17,11 @@ deploy:
     port:
     - 9090
     nodeSelector:
-      nodepool: cloudorbit
+      nodepool: clickhouse
     tolerations:
       - key: nodepool
         operator: Equal
-        value: cloudorbit
+        value: clickhouse
         effect: NoSchedule
         
 volumes:
@@ -34,5 +34,5 @@ volumes:
     
   
 properties:
-    revision : 4
+    revision : 5
     
