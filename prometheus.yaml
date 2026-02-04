@@ -49,6 +49,11 @@ scrape_configs:
           - '192.168.135.3:9100'
           - '192.168.135.17:9100'
           - '192.168.135.44:9100'
+          - '192.168.166.83:9100'
+          - '192.168.166.60:9100'
+          - '192.168.166.31:9100'
+          - '192.168.166.78:9100'
+          - '192.168.166.11:9100'
     metric_relabel_configs:
       - source_labels: ['nodename']
         regex: '(vv.master)'
@@ -69,6 +74,8 @@ scrape_configs:
           - 'clickhousecluster-25-6-0.clickhousecluster-25-6.viralvue-prod.svc.cluster.local:9363'
           - 'clickhousecluster-25-6-1.clickhousecluster-25-6.viralvue-prod.svc.cluster.local:9363'
           - 'clickhousecluster-25-6-2.clickhousecluster-25-6.viralvue-prod.svc.cluster.local:9363'
+          - 'clickhousecluster-25-6-3.clickhousecluster-25-6.viralvue-prod.svc.cluster.local:9363'
+          - 'clickhousecluster-25-6-4.clickhousecluster-25-6.viralvue-prod.svc.cluster.local:9363'
 
   - job_name: 'kubernetes-cadvisor'
     scheme: https
