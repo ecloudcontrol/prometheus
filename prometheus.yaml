@@ -235,6 +235,8 @@ scrape_configs:
       replacement: mariadb-master
     - target_label: role
       replacement: master
+    - target_label: db_engine
+      replacement: mariadb
 
   - job_name: 'mariadb-slave-exporter'
     kubernetes_sd_configs:
@@ -256,6 +258,8 @@ scrape_configs:
       replacement: mariadb-slave-10-11
     - target_label: role
       replacement: slave
+    - target_label: db_engine
+      replacement: mariadb
   
   #- job_name: 'mysql_slave'
   #  metrics_path: /metrics
@@ -283,6 +287,8 @@ scrape_configs:
       replacement: mysql-slave
     - target_label: role
       replacement: slave
+    - target_label: db_engine
+      replacement: mysql
 
   - job_name: 'app_db_health'
     scrape_interval: 15s
