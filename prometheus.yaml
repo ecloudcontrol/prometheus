@@ -8,7 +8,7 @@ alerting:
   alertmanagers:
     - static_configs:
         - targets:
-            - alert-manager-0-2.alpha-prod.svc.cluster.local:9093
+            - alert-manager-0-27.alpha-prod.svc.cluster.local:9093
 
 rule_files:
   - /opt/bitnami/prometheus/conf/rules.yaml
