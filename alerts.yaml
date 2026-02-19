@@ -59,6 +59,26 @@ groups:
       summary: "High CPU load (instance {{ $labels.instance }})"
       description: "CPU load is high\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 
+- name: High-Pod-CPU
+  rules:
+  - alert: HighPodCPU
+    expr: avg(rate(container_cpu_usage_seconds_total{namespace!="",image!="",container_name!="POD"}[5m])*100) by (pod,namespace  )  > 90
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: HighCpuUsage
+      description: "Pod cpu average value : {{ $value | printf \"%.2f\" }}"
+
+- alert: PodMemoryHigh
+  expr: sum(container_memory_working_set_bytes{image!="",namespace=~"$namespace",pod=~"$pod"}) by (pod) > 80530636800
+  for: 5m
+  labels:
+    severity: warning
+  annotations:
+    summary: "Pod memory usage exceeded 75GB"
+    description: "Pod {{ $labels.pod }} is using more than 75GB memory for 5 minutes."
+
 - name: ClickHouse-Disk
   rules:
   - alert: ClickHouseDiskSpaceLow
