@@ -32,7 +32,6 @@ scrape_configs:
           - 192.168.168.198:9100
           - 192.168.168.210:9100
           - 192.168.168.177:9100
-          - 192.168.181.54:9100
           - 192.168.181.81:9100
           - 192.168.181.73:9100
           - 192.168.130.169:9100
@@ -88,10 +87,6 @@ scrape_configs:
         regex: 192.168.168.210:9100
         target_label: nodename
         replacement: kafka-node-2
-      - source_labels: [__address__]
-        regex: 192.168.181.54:9100
-        target_label: nodename
-        replacement: chart-app-node-0
       - source_labels: [__address__]
         regex: 192.168.181.81:9100
         target_label: nodename
@@ -328,7 +323,7 @@ scrape_configs:
       module: [tcp_connect]
     static_configs:
       - targets:
-          - '192.168.1.7:3389'
+          - '172.239.142.27:3389'
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -345,7 +340,7 @@ scrape_configs:
       module: [http_2xx]
     static_configs:
       - targets:
-          - 'http://192.168.1.7:9182/metrics'
+          - 'http://172.239.142.27:9182/metrics'
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
