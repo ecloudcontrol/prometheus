@@ -304,7 +304,7 @@ scrape_configs:
     - target_label: instance
       replacement: mysql-replicas
     - target_label: role
-      replacement: slave
+      replacement: slave-replicas
     - target_label: db_engine
       replacement: mysql-replicas
       
