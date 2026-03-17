@@ -263,36 +263,36 @@ scrape_configs:
       labels:
         instance: 'windows-server'
 
-  - job_name: 'windows_rdp_tcp_check'
-    scrape_interval: 15s
-    metrics_path: /probe
-    params:
-      module: [tcp_connect]
-    static_configs:
-      - targets:
-          - '192.168.1.2:3389'
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-        replacement: windows-server
-      - target_label: __address__
-        replacement: blackbox-exporter-0-2:9115
+  # - job_name: 'windows_rdp_tcp_check'
+  #   scrape_interval: 15s
+  #   metrics_path: /probe
+  #   params:
+  #     module: [tcp_connect]
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.1.2:3389'
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #       replacement: windows-server
+  #     - target_label: __address__
+  #       replacement: blackbox-exporter-0-2:9115
 
-  - job_name: 'windows_exporter_http_check'
-    scrape_interval: 15s
-    metrics_path: /probe
-    params:
-      module: [http_2xx]
-    static_configs:
-      - targets:
-          - 'http://192.168.1.2:9182/metrics'
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-        replacement: windows-server
-      - target_label: __address__
-        replacement: blackbox-exporter-0-2:9115
+  # - job_name: 'windows_exporter_http_check'
+  #   scrape_interval: 15s
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]
+  #   static_configs:
+  #     - targets:
+  #         - 'http://192.168.1.2:9182/metrics'
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #       replacement: windows-server
+  #     - target_label: __address__
+  #       replacement: blackbox-exporter-0-2:9115
