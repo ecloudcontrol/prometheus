@@ -285,6 +285,29 @@ scrape_configs:
     - target_label: db_engine
       replacement: mysql
 
+  - job_name: 'mysql-slave-replica-exporter'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_label_run]
+      regex: mysql-replicas-8-0
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      regex: "9104"
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_ip]
+      target_label: __address__
+      replacement: ${1}:9104
+      action: replace
+    - target_label: slave_id
+      replacement: mysql-replicas
+    - target_label: instance
+      replacement: mysql-replicas
+    - target_label: role
+      replacement: slave
+    - target_label: db_engine
+      replacement: mysql-replicas
+      
   - job_name: 'app_db_health'
     scrape_interval: 15s
     metrics_path: /probe
