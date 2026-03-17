@@ -256,12 +256,12 @@ scrape_configs:
       - action: labelmap
         regex: __meta_kubernetes_node_label_(.+)
 
-  - job_name: 'windows_server'
-    metrics_path: /metrics
-    static_configs:
-    - targets: ['192.168.1.2:9182']
-      labels:
-        instance: 'windows-server'
+  # - job_name: 'windows_server'
+  #   metrics_path: /metrics
+  #   static_configs:
+  #   - targets: ['192.168.1.2:9182']
+  #     labels:
+  #       instance: 'windows-server'
 
   # - job_name: 'windows_rdp_tcp_check'
   #   scrape_interval: 15s
