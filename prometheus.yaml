@@ -89,7 +89,7 @@ scrape_configs:
         regex: 192.168.168.210:9100
         target_label: nodename
         replacement: kafka-node-2
-     - source_labels: [__address__]
+      - source_labels: [__address__]
         regex: 192.168.138.64:9100
         target_label: nodename
         replacement: chart-app-node-0
