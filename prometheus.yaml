@@ -25,17 +25,45 @@ scrape_configs:
     - targets: ['localhost:9090']
   
   - job_name: 'node-exporter'
+
     static_configs:
-    - targets: ['172.31.31.154:9100','172.31.71.188:9100','172.31.48.249:9100','172.31.69.39:9100','172.31.51.177:9100']
-    metric_relabel_configs:
-      - source_labels: ['nodename']
-        regex: '(engine.master)'
-        target_label: nodename
-        replacement: appz-${1}
-      - source_labels: ['nodename']
-        regex: 'k8s.worker.node.(.*)'
-        target_label: nodename
-        replacement: appz-dev-worker-${1}
+      - targets:
+          - '172.31.31.154:9100'
+          - '172.31.71.188:9100'
+          - '172.31.48.249:9100'
+          - '172.31.69.39:9100'
+          - '172.31.51.177:9100'
+
+    relabel_configs:
+      # engine-master
+      - source_labels: [__address__]
+        regex: '172.31.31.154:9100'
+        target_label: node
+        replacement: appz-engine-master
+
+      # worker-0
+      - source_labels: [__address__]
+        regex: '172.31.71.188:9100'
+        target_label: node
+        replacement: appz-dev-worker-0
+
+      # worker-1
+      - source_labels: [__address__]
+        regex: '172.31.48.249:9100'
+        target_label: node
+        replacement: appz-dev-worker-1
+
+      # worker-3
+      - source_labels: [__address__]
+        regex: '172.31.69.39:9100'
+        target_label: node
+        replacement: appz-dev-worker-3
+
+      # worker-4
+      - source_labels: [__address__]
+        regex: '172.31.51.177:9100'
+        target_label: node
+        replacement: appz-dev-worker-4
   
   - job_name: 'kube-state-metrics'
     static_configs:
