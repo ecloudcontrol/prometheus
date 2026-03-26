@@ -42,6 +42,8 @@ scrape_configs:
           - 192.168.140.35:9100
           - 192.168.130.124:9100
           - 192.168.167.34:9100
+          - 192.168.157.173:9100
+          - 192.168.138.64:9100
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.130.209:9100
@@ -87,6 +89,10 @@ scrape_configs:
         regex: 192.168.168.210:9100
         target_label: nodename
         replacement: kafka-node-2
+     - source_labels: [__address__]
+        regex: 192.168.138.64:9100
+        target_label: nodename
+        replacement: chart-app-node-0
       - source_labels: [__address__]
         regex: 192.168.181.81:9100
         target_label: nodename
@@ -131,6 +137,10 @@ scrape_configs:
         regex: 192.168.167.34:9100
         target_label: nodename
         replacement: mysql-slave-replica-1
+      - source_labels: [__address__]
+        regex: 192.168.157.173:9100
+        target_label: nodename
+        replacement: ai-feed-node-0
       
   - job_name: 'kube-state-metrics'
     static_configs:
