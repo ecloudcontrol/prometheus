@@ -22,7 +22,6 @@ scrape_configs:
       - targets:
           - 192.168.130.209:9100
           - 192.168.176.48:9100
-          - 192.168.135.67:9100
           - 192.168.135.69:9100
           - 172.234.144.12:9100
           - 192.168.135.53:9100
@@ -35,8 +34,6 @@ scrape_configs:
           - 192.168.181.81:9100
           - 192.168.181.73:9100
           - 192.168.130.169:9100
-          - 192.168.148.11:9100
-          - 192.168.140.249:9100
           - 192.168.140.248:9100
           - 192.168.186.244:9100
           - 192.168.140.35:9100
@@ -53,10 +50,6 @@ scrape_configs:
         regex: 192.168.176.48:9100
         target_label: nodename
         replacement: Ti-prod-worker-1
-      - source_labels: [__address__]
-        regex: 192.168.135.67:9100
-        target_label: nodename
-        replacement: Ti-prod-worker-2
       - source_labels: [__address__]
         regex: 192.168.135.69:9100
         target_label: nodename
@@ -110,17 +103,9 @@ scrape_configs:
         target_label: nodename
         replacement: MariaDB-node-1
       - source_labels: [__address__]
-        regex: 192.168.148.11:9100
-        target_label: nodename
-        replacement: Ti-prod-worker-5
-      - source_labels: [__address__]
         regex: 192.168.140.248:9100
         target_label: nodename
         replacement: Ti-prod-worker-6
-      - source_labels: [__address__]
-        regex: 192.168.140.249:9100
-        target_label: nodename
-        replacement: Ti-prod-worker-7
       - source_labels: [__address__]
         regex: 192.168.186.244:9100
         target_label: nodename
