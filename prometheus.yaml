@@ -42,6 +42,7 @@ scrape_configs:
           - 192.168.157.173:9100
           - 192.168.138.64:9100
           - 192.168.176.171:9100
+          - 192.168.157.92:9100
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.130.209:9100
@@ -95,6 +96,10 @@ scrape_configs:
         regex: 192.168.181.73:9100
         target_label: nodename
         replacement: chart-app-node-2
+      - source_labels: [__address__]
+        regex: 192.168.157.92:9100
+        target_label: nodename
+        replacement: chart-app-node-3
       - source_labels: [__address__]
         regex: 192.168.168.177:9100
         target_label: nodename
