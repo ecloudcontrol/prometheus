@@ -31,8 +31,8 @@ volumes:
     name: data
     size: 50Gi
     matchLabels: false
-    
-  
+      
 properties:
+    RETENTION_TIME: 30d
     revision : 6
     
