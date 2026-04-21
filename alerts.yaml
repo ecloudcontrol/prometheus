@@ -53,7 +53,7 @@ groups:
       expr: |
         (
           node_load15 / count without(cpu, mode) (node_cpu_seconds_total{mode="idle"})
-        ) * 100 > 80
+        ) * 100 > 95
       for: 5m
       labels:
         severity: warning
