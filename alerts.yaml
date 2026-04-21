@@ -3,13 +3,13 @@ groups:
 - name: Cpu-usage
   rules:
   - alert: HostHighCpuLoad
-    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle", instance!="192.168.147.84:9100"}[2m])) * 100) > 95
+    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle", instance!="192.168.147.84:9100"}[2m])) * 100) > 90
     for: 3m
     labels:
       severity: warning
     annotations:
       summary: Host high CPU load (instance {{ $labels.instance }})
-      description: "CPU load is > 95%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+      description: "CPU load is > 90%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
       
 - name: Disk-usage
   rules:
@@ -46,18 +46,22 @@ groups:
       title: "Low Disk space"
       summary: Host out of disk space (instance {{ $labels.instance }})
       description: "Disk is getting full (< 10% left)\n  Available Space is only= {{ $value }} %\n  LABELS = {{ $labels }}"
-
      
 - name: CPU-load
   rules:
-  - alert: HighNodeCPU
-    expr: rate(node_load15[5m]) * 100 > 80
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: High 15m CPU load ({{ $labels.instance }})
-      description: "Load average > 80%\nVALUE = {{ $value }}"
+    - alert: HighNodeCPU
+      expr: |
+        (
+          node_load15 / count without(cpu, mode) (node_cpu_seconds_total{mode="idle"})
+        ) * 100 > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High 15m CPU load on {{ $labels.instance }}"
+        description: |
+          15-minute load average is {{ $value | printf "%.2f" }}% of CPU capacity
+          on {{ $labels.instance }}.
 
 - name: High-Pod-CPU
   rules:
@@ -93,7 +97,7 @@ groups:
       annotations:
         summary: PVC high usage (namespace {{ $labels.namespace }}, claim {{ $labels.persistentvolumeclaim }})
         description: |-
-          Description: PVC usage > 80%
+          Description: PVC usage > 85%
           VALUE = {{ $value }}%
       
 - name: ClickHouse-Disk
