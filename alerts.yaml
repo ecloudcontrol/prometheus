@@ -47,21 +47,21 @@ groups:
       summary: Host out of disk space (instance {{ $labels.instance }})
       description: "Disk is getting full (< 10% left)\n  Available Space is only= {{ $value }} %\n  LABELS = {{ $labels }}"
      
-- name: CPU-load
-  rules:
-    - alert: HighNodeCPU
-      expr: |
-        (
-          node_load15 / count without(cpu, mode) (node_cpu_seconds_total{mode="idle"})
-        ) * 100 > 95
-      for: 5m
-      labels:
-        severity: warning
-      annotations:
-        summary: "High 15m CPU load on {{ $labels.instance }}"
-        description: |
-          15-minute load average is {{ $value | printf "%.2f" }}% of CPU capacity
-          on {{ $labels.instance }}.
+#- name: CPU-load
+# rules:
+#   - alert: HighNodeCPU
+#     expr: |
+#       (
+#         node_load15 / count without(cpu, mode) (node_cpu_seconds_total{mode="idle"})
+#       ) * 100 > 95
+#     for: 5m
+#     labels:
+#       severity: warning
+#     annotations:
+#        summary: "High 15m CPU load on {{ $labels.instance }}"
+#        description: |
+#          15-minute load average is {{ $value | printf "%.2f" }}% of CPU capacity
+#          on {{ $labels.instance }}.
 
 - name: High-Pod-CPU
   rules:
