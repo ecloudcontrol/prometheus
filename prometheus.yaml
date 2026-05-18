@@ -22,9 +22,8 @@ scrape_configs:
       - targets:
           - 192.168.130.209:9100
           - 192.168.176.48:9100
-          - 192.168.135.69:9100
+          - 192.168.159.156:9100   
           - 172.234.144.12:9100
-          - 192.168.135.53:9100
           - 172.234.136.73:9100
           - 192.168.175.224:9100
           - 192.168.168.69:9100
@@ -34,8 +33,7 @@ scrape_configs:
           - 192.168.181.81:9100
           - 192.168.181.73:9100
           - 192.168.130.169:9100
-          - 192.168.140.248:9100
-          - 192.168.186.244:9100
+          - 192.168.156.102:9100
           - 192.168.140.35:9100
           - 192.168.130.124:9100
           - 192.168.167.34:9100
@@ -44,6 +42,7 @@ scrape_configs:
           - 192.168.176.171:9100
           - 192.168.157.92:9100
           - 192.168.138.10:9100
+          - 192.168.149.103:9100
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.130.209:9100
@@ -54,17 +53,13 @@ scrape_configs:
         target_label: nodename
         replacement: Ti-prod-worker-1
       - source_labels: [__address__]
-        regex: 192.168.135.69:9100
+        regex: 192.168.159.156:9100
         target_label: nodename
         replacement: Ti-prod-worker-2
       - source_labels: [__address__]
         regex: 172.234.144.12:9100
         target_label: nodename
         replacement: prod-engine-master
-      - source_labels: [__address__]
-        regex: 192.168.135.53:9100
-        target_label: nodename
-        replacement: Ti-prod-worker-3
       - source_labels: [__address__]
         regex: 172.234.136.73:9100
         target_label: nodename
@@ -76,11 +71,11 @@ scrape_configs:
       - source_labels: [__address__]
         regex: 192.168.168.69:9100
         target_label: nodename
-        replacement: kafka-node-0 
+        replacement: kafka-node-0
       - source_labels: [__address__]
         regex: 192.168.168.198:9100
         target_label: nodename
-        replacement: kafka-node-1  
+        replacement: kafka-node-1
       - source_labels: [__address__]
         regex: 192.168.168.210:9100
         target_label: nodename
@@ -110,17 +105,13 @@ scrape_configs:
         target_label: nodename
         replacement: MariaDB-node-1
       - source_labels: [__address__]
-        regex: 192.168.140.248:9100
+        regex: 192.168.156.102:9100
         target_label: nodename
-        replacement: Ti-prod-worker-4
-      - source_labels: [__address__]
-        regex: 192.168.186.244:9100
-        target_label: nodename
-        replacement: pricealerts-node-0
+        replacement: oddsmaker-node-0
       - source_labels: [__address__]
         regex: 192.168.140.35:9100
         target_label: nodename
-        replacement: market-explorer-node-0 
+        replacement: market-explorer-node-0
       - source_labels: [__address__]
         regex: 192.168.130.124:9100
         target_label: nodename
@@ -141,6 +132,11 @@ scrape_configs:
         regex: 192.168.138.10:9100
         target_label: nodename
         replacement: mysql-slave-replica-2
+      - source_labels: [__address__]
+        regex: 192.168.149.103:9100
+        target_label: nodename
+        replacement: ai-feed-node-1
+        
   - job_name: 'kube-state-metrics'
     static_configs:
       - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
