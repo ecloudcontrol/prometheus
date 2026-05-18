@@ -300,13 +300,16 @@ groups:
 - name: Kafka-HighLag
   rules:
   - alert: KafkaHighConsumerLag
-    expr: sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 20
-    for: 5m
+    expr: |
+      sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 1000000
+      and
+      rate(kafka_consumergroup_current_offset{topic!="__consumer_offsets"}[10m]) <= 0
+    for: 10m
     labels:
       severity: warning
     annotations:
       summary: "High Kafka Consumer Lag"
-      description: "Consumers are falling behind. Total lag: {{ $value }} messages."
+      description: "Consumers are falling behind and offsets are not advancing. Total lag: {{ $value }} messages."
 
 - name: Kafka-ConsumerStalled
   rules:
