@@ -136,8 +136,8 @@ groups:
 - name: ClickHouse-Queries
   rules:
   - alert: ClickHouseTooManyConcurrentQueries
-    expr: ClickHouseMetrics_Query > 150
-    for: 5m
+    expr: ClickHouseMetrics_Query > 200
+    for: 10m
     labels:
       severity: warning
     annotations:
