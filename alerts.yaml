@@ -353,7 +353,7 @@ groups:
 - name: Kafka-HighCPU
   rules:
   - alert: KafkaHighCPUUsage
-    expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+    expr: rate(process_cpu_seconds_total{job="kafka_jmx"}[5m]) / 8 * 100 > 80
     for: 10m
     labels:
       severity: warning
