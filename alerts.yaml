@@ -85,7 +85,7 @@ groups:
     annotations:
       summary: PVC high usage (namespace {{ $labels.namespace }}, claim {{ $labels.persistentvolumeclaim }})
       description: |-
-        Description: PVC usage > 70%
+        Description: PVC usage > 90%
         VALUE = {{ $value }}%
 
 - name: MySQL-ReplicaDown
