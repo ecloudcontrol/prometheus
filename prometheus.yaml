@@ -22,43 +22,49 @@ scrape_configs:
       - targets: ['localhost:9090']
 
 
-  ####################################
-  # NODE EXPORTERS WITH CUSTOM NAMES
-  ####################################
-  - job_name: 'node-exporter'
-    static_configs:
-      - targets:
-          - 192.168.144.198:9100
-          - 192.168.144.151:9100
-          - 172.233.193.238:9100
-          - 192.168.181.210:9100
-          - 172.233.197.223:9100
-          - 192.168.1.5:9100
-    relabel_configs:
-      - source_labels: [__address__]
-        regex: 192.168.144.198:9100
-        target_label: nodename
-        replacement: Ti-preprod-worker-0
-      - source_labels: [__address__]
-        regex: 192.168.144.151:9100
-        target_label: nodename
-        replacement: Ti-preprod-worker-1
-      - source_labels: [__address__]
-        regex: 172.233.197.223:9100
-        target_label: nodename
-        replacement: VPN-Server-Preprod
-      - source_labels: [__address__]
-        regex: 172.233.193.238:9100
-        target_label: nodename
-        replacement: engine-master
-      - source_labels: [__address__]
-        regex: 192.168.181.210:9100
-        target_label: nodename
-        replacement: Ti-preprod-worker-2
-      - source_labels: [__address__]
-        regex: 192.168.1.5:9100
-        target_label: nodename
-        replacement: engine-master-0
+####################################
+# NODE EXPORTERS WITH CUSTOM NAMES
+####################################
+- job_name: 'node-exporter'
+  static_configs:
+    - targets:
+        - 192.168.137.18:9100
+        - 192.168.137.103:9100
+        - 192.168.191.25:9100
+        - 192.168.152.141:9100
+        - 172.233.193.238:9100
+        - 192.168.1.5:9100
+
+  relabel_configs:
+    - source_labels: [__address__]
+      regex: 192.168.137.18:9100
+      target_label: nodename
+      replacement: Ti-preprod-worker-0
+
+    - source_labels: [__address__]
+      regex: 192.168.137.103:9100
+      target_label: nodename
+      replacement: Ti-preprod-worker-1
+
+    - source_labels: [__address__]
+      regex: 192.168.191.25:9100
+      target_label: nodename
+      replacement: Ti-preprod-worker-2
+
+    - source_labels: [__address__]
+      regex: 192.168.152.141:9100
+      target_label: nodename
+      replacement: Ti-preprod-worker-3
+
+    - source_labels: [__address__]
+      regex: 172.233.193.238:9100
+      target_label: nodename
+      replacement: engine-master
+
+    - source_labels: [__address__]
+      regex: 192.168.1.5:9100
+      target_label: nodename
+      replacement: engine-master-0
 
   ####################################
   # KUBE STATE METRICS
