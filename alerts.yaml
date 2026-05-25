@@ -136,13 +136,13 @@ groups:
 - name: ClickHouse-Queries
   rules:
   - alert: ClickHouseTooManyConcurrentQueries
-    expr: ClickHouseMetrics_Query > 200
+    expr: ClickHouseMetrics_Query > 300
     for: 10m
     labels:
       severity: warning
     annotations:
       summary: "Too many concurrent queries (instance {{ $labels.instance }})"
-      description: "Concurrent queries > 150\nVALUE = {{ $value }}"
+      description: "Concurrent queries > 300\nVALUE = {{ $value }}"
 
   - alert: ClickHouseQueryQueueOverload
     expr: ClickHouseMetrics_QueryPending > 20
