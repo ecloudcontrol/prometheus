@@ -119,8 +119,8 @@ groups:
       title: "Low Disk Space"
 
   - alert: WindowsHighDiskLatency
-    expr: rate(windows_logical_disk_read_write_latency_seconds_total[10m]) > 0.5   # 0.5s threshold
-    for: 15m
+    expr: rate(windows_logical_disk_read_write_latency_seconds_total[10m]) > 1   # 1s threshold
+    for: 1h
     labels:
       severity: warning
     annotations:
