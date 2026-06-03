@@ -20,9 +20,9 @@ scrape_configs:
   - job_name: 'node-exporter'
     static_configs:
       - targets:
-          - 192.168.130.209:9100
-          - 192.168.176.48:9100
-          - 192.168.159.156:9100   
+          - 192.168.155.101:9100
+          - 192.168.151.227:9100
+          - 192.168.144.216:9100   
           - 172.234.144.12:9100
           - 172.234.136.73:9100
           - 192.168.175.224:9100
@@ -45,15 +45,15 @@ scrape_configs:
           - 192.168.149.103:9100
     relabel_configs:
       - source_labels: [__address__]
-        regex: 192.168.130.209:9100
+        regex: 192.168.155.101:9100
         target_label: nodename
         replacement: Ti-prod-worker-0
       - source_labels: [__address__]
-        regex: 192.168.176.48:9100
+        regex: 192.168.151.227:9100
         target_label: nodename
         replacement: Ti-prod-worker-1
       - source_labels: [__address__]
-        regex: 192.168.159.156:9100
+        regex: 192.168.144.216:9100
         target_label: nodename
         replacement: Ti-prod-worker-2
       - source_labels: [__address__]
@@ -381,7 +381,7 @@ scrape_configs:
     params:
       module: [tcp_connect]
     static_configs:
-      - targets: ['192.168.130.209:31192']
+      - targets: ['192.168.155.101:31192']
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
