@@ -33,16 +33,16 @@ scrape_configs:
           - 192.168.181.81:9100
           - 192.168.181.73:9100
           - 192.168.130.169:9100
-          - 192.168.156.102:9100
+          - 192.168.162.187:9100
           - 192.168.140.35:9100
-          - 192.168.130.124:9100
+          - 192.168.183.152:9100
           - 192.168.167.34:9100
-          - 192.168.157.173:9100
+          - 192.168.147.133:9100
           - 192.168.138.64:9100
           - 192.168.176.171:9100
           - 192.168.157.92:9100
           - 192.168.138.10:9100
-          - 192.168.149.103:9100
+          - 192.168.154.187:9100
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.155.101:9100
@@ -105,7 +105,7 @@ scrape_configs:
         target_label: nodename
         replacement: MariaDB-node-1
       - source_labels: [__address__]
-        regex: 192.168.156.102:9100
+        regex: 192.168.162.187:9100
         target_label: nodename
         replacement: oddsmaker-node-0
       - source_labels: [__address__]
@@ -113,7 +113,7 @@ scrape_configs:
         target_label: nodename
         replacement: market-explorer-node-0
       - source_labels: [__address__]
-        regex: 192.168.130.124:9100
+        regex: 192.168.183.152:9100
         target_label: nodename
         replacement: fasalert-node-0
       - source_labels: [__address__]
@@ -121,7 +121,7 @@ scrape_configs:
         target_label: nodename
         replacement: mysql-slave-replica-0
       - source_labels: [__address__]
-        regex: 192.168.157.173:9100
+        regex: 192.168.147.133:9100
         target_label: nodename
         replacement: ai-feed-node-0
       - source_labels: [__address__]
@@ -133,7 +133,7 @@ scrape_configs:
         target_label: nodename
         replacement: mysql-slave-replica-2
       - source_labels: [__address__]
-        regex: 192.168.149.103:9100
+        regex: 192.168.154.187:9100
         target_label: nodename
         replacement: ai-feed-node-1
         
