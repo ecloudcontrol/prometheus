@@ -25,7 +25,7 @@ scrape_configs:
           - 192.168.144.216:9100   
           - 172.234.144.12:9100
           - 172.234.136.73:9100
-          - 192.168.175.224:9100
+          - 192.168.176.96:9100
           - 192.168.168.69:9100
           - 192.168.168.198:9100
           - 192.168.168.210:9100
@@ -65,7 +65,7 @@ scrape_configs:
         target_label: nodename
         replacement: VPN-Server-Prod
       - source_labels: [__address__]
-        regex: 192.168.175.224:9100
+        regex: 192.168.176.96:9100
         target_label: nodename
         replacement: mysql-prod-node-0
       - source_labels: [__address__]
