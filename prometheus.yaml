@@ -30,7 +30,6 @@ scrape_configs:
           - 192.168.137.18:9100
           - 192.168.137.103:9100
           - 192.168.191.25:9100
-          - 192.168.152.141:9100
           - 172.233.193.238:9100
           - 192.168.1.5:9100
 
@@ -50,10 +49,6 @@ scrape_configs:
         target_label: nodename
         replacement: Ti-preprod-worker-2
 
-      - source_labels: [__address__]
-        regex: 192.168.152.141:9100
-        target_label: nodename
-        replacement: Ti-preprod-worker-3
 
       - source_labels: [__address__]
         regex: 172.233.193.238:9100
