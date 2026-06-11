@@ -43,6 +43,7 @@ scrape_configs:
           - 192.168.183.131:9100
           - 192.168.138.10:9100
           - 192.168.154.187:9100
+          - 192.168.164.213:9100
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.155.101:9100
@@ -136,7 +137,10 @@ scrape_configs:
         regex: 192.168.154.187:9100
         target_label: nodename
         replacement: ai-feed-node-1
-        
+      - source_labels: [__address__]
+        regex: 192.168.164.213:9100
+        target_label: nodename
+        replacement: wordpress-node-0      
   - job_name: 'kube-state-metrics'
     static_configs:
       - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
