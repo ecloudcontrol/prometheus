@@ -29,21 +29,22 @@ scrape_configs:
           - 192.168.168.69:9100
           - 192.168.168.198:9100
           - 192.168.168.210:9100
-          - 192.168.168.177:9100
+          - 192.168.171.196:9100
           - 192.168.129.186:9100
           - 192.168.183.33:9100
-          - 192.168.130.169:9100
+          - 192.168.171.230:9100
           - 192.168.162.187:9100
           - 192.168.169.82:9100
           - 192.168.183.152:9100
-          - 192.168.167.34:9100
+          - 192.168.129.173:9100
           - 192.168.147.133:9100
           - 192.168.183.13:9100
-          - 192.168.176.171:9100
+          - 192.168.129.112:9100
           - 192.168.183.131:9100
-          - 192.168.138.10:9100
+          - 192.168.129.249:9100
           - 192.168.154.187:9100
           - 192.168.164.213:9100
+          - 192.168.129.98:9100
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.155.101:9100
@@ -98,11 +99,11 @@ scrape_configs:
         target_label: nodename
         replacement: chart-app-node-3
       - source_labels: [__address__]
-        regex: 192.168.168.177:9100
+        regex: 192.168.171.196:9100
         target_label: nodename
         replacement: MariaDB-node-0
       - source_labels: [__address__]
-        regex: 192.168.130.169:9100
+        regex: 192.168.171.230:9100
         target_label: nodename
         replacement: MariaDB-node-1
       - source_labels: [__address__]
@@ -118,7 +119,7 @@ scrape_configs:
         target_label: nodename
         replacement: fasalert-node-0
       - source_labels: [__address__]
-        regex: 192.168.167.34:9100
+        regex: 192.168.129.173:9100
         target_label: nodename
         replacement: mysql-slave-replica-0
       - source_labels: [__address__]
@@ -126,11 +127,11 @@ scrape_configs:
         target_label: nodename
         replacement: ai-feed-node-0
       - source_labels: [__address__]
-        regex: 192.168.176.171:9100
+        regex: 192.168.129.112:9100
         target_label: nodename
         replacement: mysql-slave-replica-1
       - source_labels: [__address__]
-        regex: 192.168.138.10:9100
+        regex: 192.168.129.249:9100
         target_label: nodename
         replacement: mysql-slave-replica-2
       - source_labels: [__address__]
@@ -140,7 +141,11 @@ scrape_configs:
       - source_labels: [__address__]
         regex: 192.168.164.213:9100
         target_label: nodename
-        replacement: wordpress-node-0      
+        replacement: wordpress-node-0    
+      - source_labels: [__address__]
+        regex: 192.168.129.98:9100
+        target_label: nodename
+        replacement: mysql-slave-replica-3
   - job_name: 'kube-state-metrics'
     static_configs:
       - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
