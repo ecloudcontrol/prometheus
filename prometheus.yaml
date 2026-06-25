@@ -26,9 +26,9 @@ scrape_configs:
           - 172.234.144.12:9100
           - 172.234.136.73:9100
           - 192.168.176.96:9100
-          - 192.168.168.69:9100
-          - 192.168.168.198:9100
-          - 192.168.168.210:9100
+          - 192.168.131.158:9100
+          - 192.168.131.175:9100
+          - 192.168.131.180:9100
           - 192.168.171.196:9100
           - 192.168.129.186:9100
           - 192.168.183.33:9100
@@ -71,15 +71,15 @@ scrape_configs:
         target_label: nodename
         replacement: mysql-prod-node-0
       - source_labels: [__address__]
-        regex: 192.168.168.69:9100
+        regex: 192.168.131.158:9100
         target_label: nodename
         replacement: kafka-node-0
       - source_labels: [__address__]
-        regex: 192.168.168.198:9100
+        regex: 192.168.131.175:9100
         target_label: nodename
         replacement: kafka-node-1
       - source_labels: [__address__]
-        regex: 192.168.168.210:9100
+        regex: 192.168.131.180:9100
         target_label: nodename
         replacement: kafka-node-2
       - source_labels: [__address__]
