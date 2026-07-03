@@ -45,6 +45,7 @@ scrape_configs:
           - 192.168.154.187:9100
           - 192.168.164.213:9100
           - 192.168.129.98:9100
+          - 192.168.1.142:9100
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.155.101:9100
@@ -146,6 +147,11 @@ scrape_configs:
         regex: 192.168.129.98:9100
         target_label: nodename
         replacement: mysql-slave-replica-3
+      - source_labels: [__address__]
+        regex: 192.168.1.142:9100
+        target_label: nodename
+        replacement: real-time-server-node
+        
   - job_name: 'kube-state-metrics'
     static_configs:
       - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
