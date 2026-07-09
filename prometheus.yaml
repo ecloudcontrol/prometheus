@@ -22,7 +22,7 @@ scrape_configs:
       - targets:
           - 192.168.155.101:9100
           - 192.168.151.227:9100
-          - 192.168.144.216:9100   
+          - 192.168.144.216:9100
           - 172.234.144.12:9100
           - 172.234.136.73:9100
           - 192.168.176.96:9100
@@ -142,7 +142,7 @@ scrape_configs:
       - source_labels: [__address__]
         regex: 192.168.164.213:9100
         target_label: nodename
-        replacement: wordpress-node-0    
+        replacement: wordpress-node-0
       - source_labels: [__address__]
         regex: 192.168.129.98:9100
         target_label: nodename
@@ -151,7 +151,7 @@ scrape_configs:
         regex: 192.168.1.142:9100
         target_label: nodename
         replacement: real-time-server-node
-        
+
   - job_name: 'kube-state-metrics'
     static_configs:
       - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
@@ -214,7 +214,7 @@ scrape_configs:
       action: replace
     - target_label: component
       replacement: kafka
- 
+
   - job_name: 'kafka_jmx'
     kubernetes_sd_configs:
       - role: pod
@@ -275,13 +275,7 @@ scrape_configs:
       replacement: slave
     - target_label: db_engine
       replacement: mariadb
-  
-  #- job_name: 'mysql_slave'
-  #  metrics_path: /metrics
-  #  static_configs:
-   #   - targets: ['10.2.2.139:9104']
-      #  labels:
-    #      role: slave  
+
   - job_name: 'mysql-slave-exporter'
     kubernetes_sd_configs:
       - role: pod
@@ -373,7 +367,7 @@ scrape_configs:
       replacement: slave-replicas
     - target_label: db_engine
       replacement: mysql-replicas
-      
+
   - job_name: 'app_db_health'
     scrape_interval: 15s
     metrics_path: /probe
@@ -382,21 +376,6 @@ scrape_configs:
     static_configs:
       - targets: ['mysql-healthcheck-3-11:5000/health/db']
 
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-      - target_label: __address__
-        replacement: blackbox-exporter-0-2:9115
-
-  - job_name: 'tcp_connect_check'
-    scrape_interval: 15s
-    metrics_path: /probe
-    params:
-      module: [tcp_connect]
-    static_configs:
-      - targets: ['192.168.155.101:31192']
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -439,6 +418,12 @@ scrape_configs:
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
 
+  # ---------------------------------------------------------------------
+  # Application NodePort TCP reachability checks (tradeideas/PROD context)
+  # NOTE: 'fastoplist-1-0' (port 31192) previously lived in its own
+  # 'tcp_connect_check' job — it's folded in here now, so that separate
+  # job has been removed to avoid double-scraping the same target.
+  # ---------------------------------------------------------------------
   - job_name: 'blackbox_prod_apps_tcp'
     scrape_interval: 15s
     metrics_path: /probe
@@ -454,15 +439,28 @@ scrape_configs:
           - '192.168.155.101:31359'   # Misc MS                 (misc-ms-1-0)
           - '192.168.155.101:32029'   # Oddsmaker               (oddsmaker-1-0)
           - '192.168.155.101:31830'   # AI Feed                 (tiq-aifeed-1-0)
+          - '192.168.155.101:31831'   # AI Feed (replica 1)     (tiq-aifeed-1-1)
           - '192.168.155.101:32648'   # Charts                  (tiq-charts-1-0)
           - '192.168.155.101:32346'   # Market Explorer         (tiq-marketexplorer-1-0)
           - '192.168.155.101:32382'   # Price Alerts            (tiq-pricealerts-1-0)
           - '192.168.155.101:30345'   # TIQ Misc                (tiq-tiqmisc-1-0)
           - '192.168.155.101:30372'   # Delayed Charts          (tiq-delayedcharts-1-0)
-          - '192.168.155.101:32711'   # FastTopList Relay       (fastoplist-relay-1-0)
+          - '192.168.155.101:31192'   # FastTopList             (fastoplist-1-0)
+          - '192.168.155.101:31295'   # FastTopList Relay       (fastoplist-relay-1-0)
           - '192.168.155.101:30386'   # LAMP Product Web        (lamp-productweb-1-0)
           - '192.168.155.101:31598'   # Nginx                   (nginx-1-26)
           - '192.168.155.101:31573'   # WordPress               (wordpress-6-7)
+          - '192.168.155.101:32300'   # MariaDB Master          (mariadb-master-chart-10-11)
+          - '192.168.155.101:30262'   # MariaDB Slave           (mariadb-slave-chart-10-11)
+          - '192.168.155.101:32351'   # MySQL Slave             (mysql-slave-8-0)
+          - '192.168.155.101:31074'   # MySQL Replica 0         (mysql-replicas-8-0-0)
+          - '192.168.155.101:31075'   # MySQL Replica 1         (mysql-replicas-8-0-1)
+          - '192.168.155.101:31077'   # MySQL Replica 2         (mysql-replicas-8-0-2)
+          - '192.168.155.101:31079'   # MySQL Replica 3         (mysql-replicas-8-0-3)
+          - '192.168.155.101:30331'   # WordPress DB            (wordpress-db-10-11)
+          - '192.168.155.101:32001'   # Kafka Broker 0          (kafka-cluster-4-0-0)
+          - '192.168.155.101:32002'   # Kafka Broker 1          (kafka-cluster-4-0-1)
+          - '192.168.155.101:32003'   # Kafka Broker 2          (kafka-cluster-4-0-2)
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -470,7 +468,7 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
- 
+
       - source_labels: [__param_target]
         regex: '192\.168\.155\.101:30134'
         target_label: app
@@ -504,6 +502,10 @@ scrape_configs:
         target_label: app
         replacement: ai-feed
       - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31831'
+        target_label: app
+        replacement: ai-feed-replica-1
+      - source_labels: [__param_target]
         regex: '192\.168\.155\.101:32648'
         target_label: app
         replacement: charts
@@ -524,7 +526,11 @@ scrape_configs:
         target_label: app
         replacement: delayed-charts
       - source_labels: [__param_target]
-        regex: '192\.168\.155\.101:32711'
+        regex: '192\.168\.155\.101:31192'
+        target_label: app
+        replacement: fastoplist
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31295'
         target_label: app
         replacement: fastoplist-relay
       - source_labels: [__param_target]
@@ -539,3 +545,102 @@ scrape_configs:
         regex: '192\.168\.155\.101:31573'
         target_label: app
         replacement: wordpress
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32300'
+        target_label: app
+        replacement: mariadb-master
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30262'
+        target_label: app
+        replacement: mariadb-slave
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32351'
+        target_label: app
+        replacement: mysql-slave
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31074'
+        target_label: app
+        replacement: mysql-replica-0
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31075'
+        target_label: app
+        replacement: mysql-replica-1
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31077'
+        target_label: app
+        replacement: mysql-replica-2
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31079'
+        target_label: app
+        replacement: mysql-replica-3
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30331'
+        target_label: app
+        replacement: wordpress-db
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32001'
+        target_label: app
+        replacement: kafka-broker-0
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32002'
+        target_label: app
+        replacement: kafka-broker-1
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32003'
+        target_label: app
+        replacement: kafka-broker-2
+
+  # ---------------------------------------------------------------------
+  # Infra/monitoring-stack NodePort TCP reachability checks (alpha/PROD context)
+  # Same cluster nodes, so reachable via the same node IP (192.168.155.101).
+  # ---------------------------------------------------------------------
+  - job_name: 'blackbox_prod_infra_tcp'
+    scrape_interval: 15s
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]
+    static_configs:
+      - targets:
+          - '192.168.155.101:30195'   # Alertmanager            (alert-manager-0-27)
+          - '192.168.155.101:32159'   # Grafana 10.4             (grafana-10-4)
+          - '192.168.155.101:32668'   # Vault (API/UI, 8200)     (vault-0-4)
+          - '192.168.155.101:30515'   # Prometheus (self)        (prometheus-3-0)
+          - '192.168.155.101:30246'   # Log Collector - Mongo    (appz-logcollectordb-3-1)
+          - '192.168.155.101:30921'   # Log Collector - ES       (appz-logcollectores-3-1)
+          - '192.168.155.101:30101'   # Log Collector - Graylog  (appz-logcollectorgl-3-1)
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter-0-2:9115
+
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30195'
+        target_label: app
+        replacement: alert-manager
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32159'
+        target_label: app
+        replacement: grafana-10-4
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32668'
+        target_label: app
+        replacement: vault
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30515'
+        target_label: app
+        replacement: prometheus
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30246'
+        target_label: app
+        replacement: logcollector-db
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30921'
+        target_label: app
+        replacement: logcollector-es
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30101'
+        target_label: app
+        replacement: logcollector-gl
