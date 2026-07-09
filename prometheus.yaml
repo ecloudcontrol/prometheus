@@ -438,3 +438,104 @@ scrape_configs:
         replacement: windows-server
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
+
+  - job_name: 'blackbox_prod_apps_tcp'
+    scrape_interval: 15s
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]
+    static_configs:
+      - targets:
+          - '192.168.155.101:30134'   # AX Alert Server        (ax-server-1-0)
+          - '192.168.155.101:30892'   # FasAlert                (fasalert-1-0)
+          - '192.168.155.101:31393'   # FasMaster               (fasmaster-1-0)
+          - '192.168.155.101:32762'   # Tunnel-Proxy            (http-tunnel-proxy-1-1)
+          - '192.168.155.101:31389'   # Microproxy              (microproxy-1-0)
+          - '192.168.155.101:31359'   # Misc MS                 (misc-ms-1-0)
+          - '192.168.155.101:32029'   # Oddsmaker               (oddsmaker-1-0)
+          - '192.168.155.101:31830'   # AI Feed                 (tiq-aifeed-1-0)
+          - '192.168.155.101:32648'   # Charts                  (tiq-charts-1-0)
+          - '192.168.155.101:32346'   # Market Explorer         (tiq-marketexplorer-1-0)
+          - '192.168.155.101:32382'   # Price Alerts            (tiq-pricealerts-1-0)
+          - '192.168.155.101:30345'   # TIQ Misc                (tiq-tiqmisc-1-0)
+          - '192.168.155.101:30372'   # Delayed Charts          (tiq-delayedcharts-1-0)
+          - '192.168.155.101:32711'   # FastTopList Relay       (fastoplist-relay-1-0)
+          - '192.168.155.101:30386'   # LAMP Product Web        (lamp-productweb-1-0)
+          - '192.168.155.101:31598'   # Nginx                   (nginx-1-26)
+          - '192.168.155.101:31573'   # WordPress               (wordpress-6-7)
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter-0-2:9115
+ 
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30134'
+        target_label: app
+        replacement: ax-alert-server
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30892'
+        target_label: app
+        replacement: fasalert
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31393'
+        target_label: app
+        replacement: fasmaster
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32762'
+        target_label: app
+        replacement: tunnel-proxy
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31389'
+        target_label: app
+        replacement: microproxy
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31359'
+        target_label: app
+        replacement: misc-ms
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32029'
+        target_label: app
+        replacement: oddsmaker
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31830'
+        target_label: app
+        replacement: ai-feed
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32648'
+        target_label: app
+        replacement: charts
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32346'
+        target_label: app
+        replacement: market-explorer
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32382'
+        target_label: app
+        replacement: price-alerts
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30345'
+        target_label: app
+        replacement: tiq-misc
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30372'
+        target_label: app
+        replacement: delayed-charts
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:32711'
+        target_label: app
+        replacement: fastoplist-relay
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:30386'
+        target_label: app
+        replacement: lamp-productweb
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31598'
+        target_label: app
+        replacement: nginx
+      - source_labels: [__param_target]
+        regex: '192\.168\.155\.101:31573'
+        target_label: app
+        replacement: wordpress
