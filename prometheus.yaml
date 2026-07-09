@@ -46,6 +46,9 @@ scrape_configs:
           - 192.168.164.213:9100
           - 192.168.129.98:9100
           - 192.168.1.142:9100
+          - 192.168.159.12:9100
+          - 192.168.159.45:9100
+          - 192.168.159.49:9100
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.155.101:9100
@@ -151,7 +154,19 @@ scrape_configs:
         regex: 192.168.1.142:9100
         target_label: nodename
         replacement: real-time-server-node
-
+      - source_labels: [__address__]
+        regex: 192.168.159.12:9100
+        target_label: nodename
+        replacement: micro-proxy-node-0     
+      - source_labels: [__address__]
+        regex: 192.168.159.45:9100
+        target_label: nodename
+        replacement: micro-proxy-node-1
+      - source_labels: [__address__]
+        regex: 192.168.159.49:9100
+        target_label: nodename
+        replacement: micro-proxy-node-2
+        
   - job_name: 'kube-state-metrics'
     static_configs:
       - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
@@ -383,6 +398,21 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
+        
+  - job_name: 'tcp_connect_check'
+    scrape_interval: 15s
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]
+    static_configs:
+      - targets: ['192.168.155.101:31192']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter-0-2:9115
 
   - job_name: 'windows_rdp_tcp_check'
     scrape_interval: 15s
@@ -418,12 +448,7 @@ scrape_configs:
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
 
-  # ---------------------------------------------------------------------
-  # Application NodePort TCP reachability checks (tradeideas/PROD context)
-  # NOTE: 'fastoplist-1-0' (port 31192) previously lived in its own
-  # 'tcp_connect_check' job — it's folded in here now, so that separate
-  # job has been removed to avoid double-scraping the same target.
-  # ---------------------------------------------------------------------
+
   - job_name: 'blackbox_prod_apps_tcp'
     scrape_interval: 15s
     metrics_path: /probe
@@ -591,8 +616,7 @@ scrape_configs:
         replacement: kafka-broker-2
 
   # ---------------------------------------------------------------------
-  # Infra/monitoring-stack NodePort TCP reachability checks (alpha/PROD context)
-  # Same cluster nodes, so reachable via the same node IP (192.168.155.101).
+  # Infra/monitoring-stack  (alpha/PROD context)
   # ---------------------------------------------------------------------
   - job_name: 'blackbox_prod_infra_tcp'
     scrape_interval: 15s
