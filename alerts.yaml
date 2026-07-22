@@ -38,13 +38,13 @@ groups:
         description: "Disk space < 10%\nAvailable = {{ $value }}%"
 
     - alert: HighNodeCPU
-      expr: rate(node_load15[5m]) * 100 > 80
-      for: 5m
+      expr: rate(node_load15[5m]) * 100 > 90
+      for: 10m
       labels:
         severity: warning
       annotations:
         summary: High 15m CPU load ({{ $labels.instance }})
-        description: "Load average > 80%\nVALUE = {{ $value }}"
+        description: "Load average > 90%\nVALUE = {{ $value }}"
 
 - name: network-probes
   rules:
@@ -572,3 +572,4 @@ groups:
       annotations:
         summary: "PVC critically full ({{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }})"
         description: "PVC {{ $labels.persistentvolumeclaim }} usage is {{ $value | printf \"%.1f\" }}% — risk of pod eviction."
+
