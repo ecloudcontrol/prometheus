@@ -17,11 +17,11 @@ deploy:
     port:
     - 9090
     nodeSelector:
-      nodepool: toplist
+      nodepool: tikiller-chart
     tolerations:
       - key: nodepool
         operator: Equal
-        value: toplist
+        value: tikiller-chart
         effect: NoSchedule
 
 volumes:
