@@ -1,33 +1,38 @@
+# my global config
 global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
-  external_labels:
-    datacenter: primary
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
 
+# Alertmanager configuration
 alerting:
   alertmanagers:
-    - static_configs:
-        - targets:
-            - alert-manager-0-2:9093
+  - static_configs:
+    - targets:
+       - alert-manager-0-2:9093
 
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
-  - /opt/bitnami/prometheus/conf/rules.yaml
-  - /opt/bitnami/prometheus/conf/alerts.yaml
+   - /opt/bitnami/prometheus/conf/rules.yaml 
+   - /opt/bitnami/prometheus/conf/alerts.yaml
 
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
 scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']
-
+    - targets: ['localhost:9090']
   - job_name: 'graylog'
-    static_configs:
-      - targets: ['10.152.183.166:9833']
-
-  - job_name: 'opensearch'
-    static_configs:
-      - targets: ['10.152.183.91:9200']
-    metrics_path: '/_prometheus/metrics'
-
+    scrape_interval: 15s
+    metrics_path: '/api/plugins/org.graylog.plugins.metrics.prometheus/metrics'
+    basic_auth:
+      username: admin
+      password: 4FTZOx9ACdbAw65WJH1u
+    # Optional TLS configuration; see https://prometheus.io/docs/operating/configuration/#<tls_config>
+    #tls_config:
+   # static_configs:
+    #  - targets: ['appz-nithinc.lowtouchcloud.io:443/logs.alpha-dev/']
   - job_name: 'node-exporter'
     static_configs:
       - targets:
@@ -43,10 +48,9 @@ scrape_configs:
         regex: 'qa.worker.node.(.*)'
         target_label: nodename
         replacement: appz-${1}
-
   - job_name: 'kube-state-metrics'
     static_configs:
-      - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
+    - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
 
   - job_name: 'kubernetes-cadvisor'
     scheme: https
@@ -54,81 +58,15 @@ scrape_configs:
       ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
     bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
     kubernetes_sd_configs:
-      - role: node
+    - role: node
     relabel_configs:
-      - action: labelmap
-        regex: __meta_kubernetes_node_label_(.+)
-      - target_label: __address__
-        replacement: kubernetes.default.svc:443
-      - source_labels:
-          - __meta_kubernetes_node_name
-        regex: (.+)
-        target_label: __metrics_path__
-        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
-
-  - job_name: 'blackbox'
-    metrics_path: /probe
-    params:
-     module: [http]
-    static_configs:
-    - targets:
-       - https://website-test.lowtouchcloud.io/
-       - https://ecloudcontrol.com/
-       - https://project.ecloudcontrol.com/
-       - https://tracker.ecloudcontrol.com/
-       - https://www.lowtouch.ai/
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-      - target_label: __address__
-        replacement: blackbox-exporter-0-2:9115
-
-  - job_name: 'redis'
-    kubernetes_sd_configs:
-      - role: endpoints
-    relabel_configs:
-      - source_labels:
-          - __meta_kubernetes_namespace
-        action: replace
-        target_label: namespace
-      - source_labels:
-          - __meta_kubernetes_pod_name
-        action: replace
-        target_label: pod
-      - source_labels:
-          - pod
-        regex: ((.*)redis(.*))
-        action: keep
-      - source_labels:
-          - __address__
-        target_label: __address__
-        regex: ([^:]+)(:[6379]+)?
-        replacement: ${1}
-        action: drop
-      - source_labels:
-          - __address__
-        regex: .*
-        target_label: instance
-        replacement: AppZ${1}
-
-  - job_name: 'postgresql'
-    static_configs:
-      - targets: ['10.152.183.153:9187']
-    metrics_path: /metrics
-
-  - job_name: 'kubernetes-nodes'
-    kubernetes_sd_configs:
-      - role: node
-    scheme: https
-    tls_config:
-      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-    relabel_configs:
-      - action: labelmap
-        regex: __meta_kubernetes_node_label_(.+)
-
-  - job_name: 'backup_metrics'
-    static_configs:
-      - targets: ['10.152.183.153:8006']  # Replace with your node_exporter host:port
+    - action: labelmap
+      regex: __meta_kubernetes_node_label_(.+)
+    - target_label: __address__
+      replacement: kubernetes.default.svc:443
+    - source_labels: [__meta_kubernetes_node_name]
+      regex: (.+)
+      target_label: __metrics_path__
+      replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+      
+ 
