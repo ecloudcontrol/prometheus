@@ -163,4 +163,22 @@ groups:
     annotations:
       summary: "ClickHouse ZooKeeper session lost"
       description: "ZooKeeper session state != 1\nVALUE = {{ $value }}"          
-      
+- name: ClickHouse-Replication
+  rules:
+  - alert: ClickHouseReadonlyReplica
+    expr: ClickHouseMetrics_ReadonlyReplica != 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse has read-only replicas (instance {{ $labels.instance }})"
+      description: "ReadonlyReplica metric != 0 - one or more replicated tables are stuck read-only, likely a Keeper registration/coordination issue\nVALUE = {{ $value }}"
+
+  - alert: ClickHouseReplicationQueueBacklog
+    expr: ClickHouseMetrics_ReplicasMaxQueueSize > 100
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "ClickHouse replication queue backlog (instance {{ $labels.instance }})"
+      description: "Max replication queue size > 100 - a replica may be falling behind or stuck\nVALUE = {{ $value }}"
