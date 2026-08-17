@@ -143,7 +143,6 @@ groups:
     annotations:
       summary: "Too many concurrent queries (instance {{ $labels.instance }})"
       description: "Concurrent queries > 300\nVALUE = {{ $value }}"
-
   - alert: ClickHouseQueryQueueOverload
     expr: ClickHouseMetrics_QueryPending > 20
     for: 1m
@@ -152,6 +151,14 @@ groups:
     annotations:
       summary: "ClickHouse query queue overload (instance {{ $labels.instance }})"
       description: "Pending queries > 20 (queries waiting in queue)\nVALUE = {{ $value }}"
+  - alert: ClickHouseSocketTimeoutSpike
+    expr: increase(ClickHouseErrorMetric_SOCKET_TIMEOUT[5m]) > 3
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Multiple client socket timeouts (instance {{ $labels.instance }})"
+      description: "More than 3 SOCKET_TIMEOUT errors in 5m - clients are disconnecting before large/slow queries finish; check for expensive IN-list joins or raise client timeouts\nVALUE = {{ $value }}"
 
 - name: ClickHouse-ZooKeeper
   rules:
@@ -162,7 +169,19 @@ groups:
       severity: critical
     annotations:
       summary: "ClickHouse ZooKeeper session lost"
-      description: "ZooKeeper session state != 1\nVALUE = {{ $value }}"          
+      description: "ZooKeeper session state != 1\nVALUE = {{ $value }}"
+
+- name: ClickHouse-Keeper-Stability
+  rules:
+  - alert: ClickHouseKeeperLeaderElection
+    expr: increase(ClickHouseAsyncMetrics_KeeperLeaderElections[15m]) > 0
+    for: 30s
+    labels:
+      severity: warning
+    annotations:
+      summary: "ClickHouse Keeper leader election triggered (instance {{ $labels.instance }})"
+      description: "A Raft leader election occurred in Keeper - leading indicator for stuck/partial DDL that can leave orphaned replicas behind\nVALUE = {{ $value }}"
+
 - name: ClickHouse-Replication
   rules:
   - alert: ClickHouseReadonlyReplica
@@ -173,7 +192,6 @@ groups:
     annotations:
       summary: "ClickHouse has read-only replicas (instance {{ $labels.instance }})"
       description: "ReadonlyReplica metric != 0 - one or more replicated tables are stuck read-only, likely a Keeper registration/coordination issue\nVALUE = {{ $value }}"
-
   - alert: ClickHouseReplicationQueueBacklog
     expr: ClickHouseMetrics_ReplicasMaxQueueSize > 100
     for: 5m
@@ -182,3 +200,68 @@ groups:
     annotations:
       summary: "ClickHouse replication queue backlog (instance {{ $labels.instance }})"
       description: "Max replication queue size > 100 - a replica may be falling behind or stuck\nVALUE = {{ $value }}"
+  - alert: ClickHouseReplicaCountMismatch
+    expr: max by (database, table) (ClickHouseCustom_TableReplicaCount) != 7
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Table replica count mismatch detected (instance {{ $labels.instance }})"
+      description: "A replicated table/MV does not have all 7 expected replicas - table is missing on one or more nodes. Requires a custom textfile-exporter script, see notes below.\nVALUE = {{ $value }}"
+
+- name: ClickHouse-DDL
+  rules:
+  - alert: ClickHouseDistributedDDLTimeout
+    expr: increase(ClickHouseErrorMetric_TIMEOUT_EXCEEDED[15m]) > 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse distributed DDL query timed out (instance {{ $labels.instance }})"
+      description: "A distributed_ddl_queue query raised TIMEOUT_EXCEEDED - this exact signature leaves orphaned replicas/tables on partial nodes (root cause of the Aug 15-17 incidents)\nVALUE = {{ $value }}"
+  - alert: ClickHouseReplicaAlreadyExists
+    expr: increase(ClickHouseErrorMetric_REPLICA_ALREADY_EXISTS[15m]) > 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse replica registration conflict detected (instance {{ $labels.instance }})"
+      description: "REPLICA_ALREADY_EXISTS - a table/MV creation collided with a stale ZooKeeper replica path, almost always means an orphaned .inner_id table is blocking recreation\nVALUE = {{ $value }}"
+  - alert: ClickHouseTableWasNotDropped
+    expr: increase(ClickHouseErrorMetric_TABLE_WAS_NOT_DROPPED[15m]) > 0
+    for: 30s
+    labels:
+      severity: warning
+    annotations:
+      summary: "ClickHouse table drop blocked by local table conflict (instance {{ $labels.instance }})"
+      description: "TABLE_WAS_NOT_DROPPED - usually an .inner_id orphan table occupying a ZooKeeper path; needs manual cleanup before recreation succeeds\nVALUE = {{ $value }}"
+  - alert: ClickHouseOptimizeFinalRunning
+    expr: increase(ClickHouseProfileEvents_OptimizeSkipMergedPartitions[1h]) > 0
+    for: 1m
+    labels:
+      severity: info
+    annotations:
+      summary: "OPTIMIZE ... FINAL executed (instance {{ $labels.instance }})"
+      description: "Tracks full-table OPTIMIZE FINAL operations - expensive, cluster-wide, and the known trigger behind the nightly Airflow DDL timeouts\nVALUE = {{ $value }}"
+
+- name: ClickHouse-Query-Errors
+  rules:
+  - alert: ClickHouseUnknownTableSpike
+    expr: increase(ClickHouseErrorMetric_UNKNOWN_TABLE[5m]) > 3
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Spike in UNKNOWN_TABLE errors (instance {{ $labels.instance }})"
+      description: "Multiple UNKNOWN_TABLE errors in 5m - almost always a missing MV/table on one or more replicas, causing live user-facing 500s (this is exactly how the video_detected_placements_mv gap was first detected)\nVALUE = {{ $value }}"
+
+- name: ClickHouse-Kafka
+  rules:
+  - alert: ClickHouseKafkaAssignmentFailure
+    expr: increase(ClickHouseAsyncMetrics_KafkaConsumers[15m]) < 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "ClickHouse Kafka consumer assignment issue (instance {{ $labels.instance }})"
+      description: "Kafka engine table can't get partition assignment - check consumer group health and broker connectivity\nVALUE = {{ $value }}"
