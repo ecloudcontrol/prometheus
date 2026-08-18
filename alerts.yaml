@@ -171,16 +171,6 @@ groups:
       summary: "ClickHouse ZooKeeper session lost"
       description: "ZooKeeper session state != 1\nVALUE = {{ $value }}"
 
-- name: ClickHouse-Keeper-Stability
-  rules:
-  - alert: ClickHouseKeeperLeaderElection
-    expr: increase(ClickHouseAsyncMetrics_KeeperLeaderElections[15m]) > 0
-    for: 1m
-    labels:
-      severity: warning
-    annotations:
-      summary: "ClickHouse Keeper leader election triggered (instance {{ $labels.instance }})"
-      description: "A Raft leader election occurred in Keeper - leading indicator for stuck/partial DDL that can leave orphaned replicas behind\nVALUE = {{ $value }}"
 
 - name: ClickHouse-Replication
   rules:
