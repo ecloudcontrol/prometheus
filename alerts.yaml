@@ -124,13 +124,13 @@ groups:
 - name: ClickHouse-Connections
   rules:
   - alert: ClickHouseRejectingConnections
-    expr: (ClickHouseAsyncMetrics_HTTPRejectedConnections + ClickHouseAsyncMetrics_TCPRejectedConnections) > 0
-    for: 30s
-    labels:
-      severity: critical
-    annotations:
-      summary: "ClickHouse is rejecting client connections (instance {{ $labels.instance }})"
-      description: "Rejected connections detected (> 0)\nVALUE = {{ $value }}"
+  expr: increase(ClickHouseAsyncMetrics_HTTPRejectedConnections[5m]) + increase(ClickHouseAsyncMetrics_TCPRejectedConnections[5m]) > 0
+  for: 30s
+  labels:
+    severity: critical
+  annotations:
+    summary: "ClickHouse is rejecting client connections (instance {{ $labels.instance }})"
+    description: "Rejected connections detected in the last 5m (> 0)\nVALUE = {{ $value }}"
 
 - name: ClickHouse-Queries
   rules:
