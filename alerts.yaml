@@ -255,3 +255,38 @@ groups:
     annotations:
       summary: "ClickHouse Kafka consumer assignment issue (instance {{ $labels.instance }})"
       description: "Kafka engine table can't get partition assignment - check consumer group health and broker connectivity\nVALUE = {{ $value }}"
+- name: ClickHouse-Queries
+  rules:
+  - alert: ClickHouseTooManyConcurrentQueries
+    expr: ClickHouseMetrics_Query > 750
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Too many concurrent queries (instance {{ $labels.instance }})"
+      description: "Concurrent queries > 750 (current max_concurrent_queries) - check is_initial_query split in system.processes; historically this means the node is slow and other replicas' distributed sub-queries are piling up waiting on it, not organic direct load\nVALUE = {{ $value }}"
+  - alert: ClickHouseConcurrentQueryLimitHit
+    expr: increase(ClickHouseErrorMetric_TOO_MANY_SIMULTANEOUS_QUERIES[5m]) > 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse hit max_concurrent_queries and is rejecting queries (instance {{ $labels.instance }})"
+      description: "TOO_MANY_SIMULTANEOUS_QUERIES errors detected - node is fully saturated and rejecting new connections, including diagnostic queries. Recurred 3x on 2026-09-02 (pod-6, pod-2, pod-1), always on a recently-restarted pod with high absolute_delay/queue_size in system.replicas\nVALUE = {{ $value }}"
+
+- name: ClickHouse-Pod-Lifecycle
+  rules:
+  - alert: ClickHouseReplicaRestarted
+    expr: increase(kube_pod_container_status_restarts_total{namespace="viralvue-prod", pod=~"clickhousecluster-25-6-.*"}[10m]) > 0
+    labels:
+      severity: warning
+    annotations:
+      summary: "ClickHouse pod {{ $labels.pod }} restarted"
+      description: "Pod restarted - based on 2026-09-02 incidents, expect this node to accumulate replication lag and potentially hit max_concurrent_queries within 15-90 minutes as it catches up through the background_fetches_pool_size bottleneck; monitor system.replicas queue_size and absolute_delay on this specific pod"
+  - alert: ClickHouseReplicaOOMKilled
+    expr: kube_pod_container_status_last_terminated_reason{namespace="viralvue-prod", pod=~"clickhousecluster-25-6-.*", reason="OOMKilled"} == 1
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse pod {{ $labels.pod }} was OOM-killed"
+      description: "Pod exceeded its memory limit and was hard-killed by the kernel. This was the trigger for the 2026-09-01 22:38 cascading outage - expect Connection reset by peer errors and a replication retry storm on peer nodes within minutes if not addressed"
