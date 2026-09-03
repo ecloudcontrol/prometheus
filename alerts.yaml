@@ -10,7 +10,7 @@ groups:
     annotations:
       summary: Host high CPU load (instance {{ $labels.instance }})
       description: "CPU load is > 90%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-      
+
 - name: Disk-usage
   rules:
   - alert: 'Low data disk space'
@@ -22,7 +22,6 @@ groups:
       description: 'Partition : {{$labels.mountpoint}}'
       summary: "Disk usage is `{{humanize $value}}%`"
       host: "{{$labels.instance}}"
-
 
 - name: Memory-usage
   rules:
@@ -46,7 +45,7 @@ groups:
       title: "Low Disk space"
       summary: Host out of disk space (instance {{ $labels.instance }})
       description: "Disk is getting full (< 10% left)\n  Available Space is only= {{ $value }} %\n  LABELS = {{ $labels }}"
-     
+
 #- name: CPU-load
 # rules:
 #   - alert: HighNodeCPU
@@ -99,7 +98,7 @@ groups:
         description: |-
           Description: PVC usage > 85%
           VALUE = {{ $value }}%
-      
+
 - name: ClickHouse-Disk
   rules:
   - alert: ClickHouseDiskSpaceLow
@@ -135,14 +134,22 @@ groups:
 
 - name: ClickHouse-Queries
   rules:
-  - alert: ClickHouseTooManyConcurrentQueries
-    expr: ClickHouseMetrics_Query > 300
-    for: 10m
+  - alert: ClickHouseApproachingConcurrentQueryLimit
+    expr: ClickHouseMetrics_Query / ClickHouseMetrics_MaxConcurrentQueries > 0.85
+    for: 5m
     labels:
       severity: warning
     annotations:
-      summary: "Too many concurrent queries (instance {{ $labels.instance }})"
-      description: "Concurrent queries > 300\nVALUE = {{ $value }}"
+      summary: "ClickHouse approaching max_concurrent_queries limit (instance {{ $labels.instance }})"
+      description: "Concurrent queries at {{ $value | humanizePercentage }} of configured max_concurrent_queries - check is_initial_query split in system.processes; historically this means the node is slow and other replicas' sub-queries are piling up, not organic direct load\nVALUE = {{ $value }}"
+  - alert: ClickHouseConcurrentQueryLimitHit
+    expr: increase(ClickHouseErrorMetric_TOO_MANY_SIMULTANEOUS_QUERIES[5m]) > 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse hit max_concurrent_queries and is rejecting queries (instance {{ $labels.instance }})"
+      description: "TOO_MANY_SIMULTANEOUS_QUERIES errors detected - node is fully saturated and rejecting new connections, including diagnostic queries. Recurred 3x on 2026-09-02 (pod-6, pod-2, pod-1), always on a recently-restarted pod with high absolute_delay/queue_size in system.replicas\nVALUE = {{ $value }}"
   - alert: ClickHouseQueryQueueOverload
     expr: ClickHouseMetrics_QueryPending > 20
     for: 1m
@@ -170,7 +177,6 @@ groups:
     annotations:
       summary: "ClickHouse ZooKeeper session lost"
       description: "ZooKeeper session state != 1\nVALUE = {{ $value }}"
-
 
 - name: ClickHouse-Replication
   rules:
@@ -255,24 +261,6 @@ groups:
     annotations:
       summary: "ClickHouse Kafka consumer assignment issue (instance {{ $labels.instance }})"
       description: "Kafka engine table can't get partition assignment - check consumer group health and broker connectivity\nVALUE = {{ $value }}"
-- name: ClickHouse-Queries
-  rules:
-  - alert: ClickHouseTooManyConcurrentQueries
-    expr: ClickHouseMetrics_Query / ClickHouseMetrics_MaxConcurrentQueries > 0.85
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "ClickHouse approaching max_concurrent_queries limit (instance {{ $labels.instance }})"
-      description: "Concurrent queries at {{ $value | humanizePercentage }} of configured max_concurrent_queries - check is_initial_query split in system.processes; historically this means the node is slow and other replicas' sub-queries are piling up, not organic direct load\nVALUE = {{ $value }}"
-  - alert: ClickHouseConcurrentQueryLimitHit
-    expr: increase(ClickHouseErrorMetric_TOO_MANY_SIMULTANEOUS_QUERIES[5m]) > 0
-    for: 30s
-    labels:
-      severity: critical
-    annotations:
-      summary: "ClickHouse hit max_concurrent_queries and is rejecting queries (instance {{ $labels.instance }})"
-      description: "TOO_MANY_SIMULTANEOUS_QUERIES errors detected - node is fully saturated and rejecting new connections, including diagnostic queries. Recurred 3x on 2026-09-02 (pod-6, pod-2, pod-1), always on a recently-restarted pod with high absolute_delay/queue_size in system.replicas\nVALUE = {{ $value }}"
 
 - name: ClickHouse-Pod-Lifecycle
   rules:
