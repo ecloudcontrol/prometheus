@@ -278,3 +278,24 @@ groups:
     annotations:
       summary: "ClickHouse pod {{ $labels.pod }} was OOM-killed"
       description: "Pod exceeded its memory limit and was hard-killed by the kernel. This was the trigger for the 2026-09-01 22:38 cascading outage - expect Connection reset by peer errors and a replication retry storm on peer nodes within minutes if not addressed"
+- name: ClickHouse-Final-Query-Surge
+  rules:
+  - alert: ClickHouseFinalQuerySurge
+    expr: increase(ClickHouseProfileEvents_OptimizeSkipMergedPartitions[5m]) > 5
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Surge in OPTIMIZE FINAL queries (instance {{ $labels.instance }})"
+      description: "More than 5 OPTIMIZE FINAL ops in 5m — each is expensive and cluster-wide; a surge risks merge-pool saturation and distributed DDL timeouts, same failure class as the Aug 15-17 incidents\nVALUE = {{ $value }}"
+- name: ClickHouse-Merge-Starvation
+  rules:
+  - alert: ClickHouseMergeStarvation
+    expr: ClickHouseMetrics_BackgroundMergesAndMutationsPoolTask > 28
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse merge pool saturated (instance {{ $labels.instance }})"
+      description: "Merge/mutation pool task count sustained near the 32-slot cap (background_pool_size 16 × concurrency_ratio 2) for 5m — parts aren't merging fast enough, fragmentation will climb and TOO_MANY_SIMULTANEOUS_QUERIES rejections are likely next, matching the video_detected_placements incident\nVALUE = {{ $value }}"  
+      
