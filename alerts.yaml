@@ -26,7 +26,7 @@ groups:
 - name: Memory-usage
   rules:
   - alert: HostOutOfMemory
-    expr: node_memory_MemAvailable_bytes{instance!~"192.168.130.243:.*|192.168.143.189:.*|192.168.156.102:.*|192.168.209.210:.*|192.168.134.10:.*"} / node_memory_MemTotal_bytes{instance!~"192.168.130.243:.*|192.168.143.189:.*|192.168.156.102:.*|192.168.209.210:.*|192.168.134.10:.*"} * 100 < 8
+    expr: node_memory_MemAvailable_bytes{instance!~"192.168.130.243:.*|192.168.143.189:.*|192.168.156.102:.*"} / node_memory_MemTotal_bytes{instance!~"192.168.130.243:.*|192.168.143.189:.*|192.168.156.102:.*"} * 100 < 8
     for: 10m
     labels:
       severity: warning
@@ -65,7 +65,7 @@ groups:
 - name: High-Pod-CPU
   rules:
   - alert: HighPodCPU
-    expr: avg(rate(container_cpu_usage_seconds_total{namespace!="",image!="",container_name!="POD",instance!~"192.168.159.15:.*"}[5m])*100) by (pod,namespace  )  > 3600
+    expr: avg(rate(container_cpu_usage_seconds_total{namespace!="",image!="",container_name!="POD"}[5m])*100) by (pod,namespace  )  > 3600
     for: 10m
     labels:
       severity: warning
@@ -278,33 +278,3 @@ groups:
     annotations:
       summary: "ClickHouse pod {{ $labels.pod }} was OOM-killed"
       description: "Pod exceeded its memory limit and was hard-killed by the kernel. This was the trigger for the 2026-09-01 22:38 cascading outage - expect Connection reset by peer errors and a replication retry storm on peer nodes within minutes if not addressed"
-
-- name: ClickHouse-Final-Queries
-  rules:
-  - alert: ClickHouseFinalQuerySurge
-    expr: increase(ClickHouseProfileEvents_OptimizeSkipMergedPartitions[15m]) > 3
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Surge of OPTIMIZE ... FINAL / FINAL-heavy queries (instance {{ $labels.instance }})"
-      description: "More than 3 OPTIMIZE FINAL executions in 15m - repeated FINAL merges force full-table re-merge and compete directly with the background merge pool, historically the trigger behind DDL timeouts and merge-pool saturation on this cluster\nVALUE = {{ $value }}"
-
-- name: ClickHouse-Merge-Starvation
-  rules:
-  - alert: ClickHouseMergePoolSaturated
-    expr: ClickHouseMetrics_BackgroundMergesAndMutationsPoolTask >= 32
-    for: 5m
-    labels:
-      severity: critical
-    annotations:
-      summary: "ClickHouse merge pool saturated - merge starvation risk (instance {{ $labels.instance }})"
-      description: "BackgroundMergesAndMutationsPoolTask at/above configured max (background_pool_size 16 x concurrency_ratio 2 = 32) - merges are fully backed up and parts will fragment faster than they merge; this exact signature caused fact.video_detected_placements to jump from ~4,905 to ~4,954 active parts within minutes and drove TOO_MANY_SIMULTANEOUS_QUERIES rejections from app_service_prod\nVALUE = {{ $value }}"
-  - alert: ClickHouseTooManyPartsWarning
-    expr: ClickHouseAsyncMetrics_MaxPartCountForPartition > 300
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "Partition part count climbing toward ClickHouse insert throttle (instance {{ $labels.instance }})"
-      description: "Max part count for a partition > 300 - ClickHouse starts throttling inserts (delay) at 300 parts and raises 'Too many parts' errors at 3000; early-warning signal for merge starvation before it becomes user-facing\nVALUE = {{ $value }}"
