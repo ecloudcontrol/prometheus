@@ -209,7 +209,7 @@ groups:
   rules:
   - alert: ClickHouseDistributedDDLTimeout
     expr: increase(ClickHouseErrorMetric_TIMEOUT_EXCEEDED[15m]) > 0
-    for: 5m
+    for: 10m
     labels:
       severity: critical
     annotations:
