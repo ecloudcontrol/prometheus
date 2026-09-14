@@ -10,7 +10,7 @@ groups:
     annotations:
       summary: Host high CPU load (instance {{ $labels.instance }})
       description: "CPU load is > 95%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-      
+
 - name: Disk-usage
   rules:
   - alert: 'Low data disk space'
@@ -22,7 +22,6 @@ groups:
       description: 'Partition : {{$labels.mountpoint}}'
       summary: "Disk usage is `{{humanize $value}}%`"
       host: "{{$labels.instance}}"
-
 
 - name: Memory-usage
   rules:
@@ -47,7 +46,6 @@ groups:
       summary: Host out of disk space (instance {{ $labels.instance }})
       description: "Disk is getting full (< 10% left)\n  Available Space is only= {{ $value }} %\n  LABELS = {{ $labels }}"
 
-     
 - name: CPU-load
   rules:
   - alert: HighNodeCPU
@@ -121,5 +119,83 @@ groups:
       severity: critical
     annotations:
       summary: "ClickHouse ZooKeeper session lost"
-      description: "ZooKeeper session state != 1\nVALUE = {{ $value }}"          
-      
+      description: "ZooKeeper session state != 1\nVALUE = {{ $value }}"
+
+- name: PVC-usage
+  rules:
+    - alert: PVCHighUsage
+      expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) * 100 > 85
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: PVC high usage (namespace {{ $labels.namespace }}, claim {{ $labels.persistentvolumeclaim }})
+        description: |-
+          Description: PVC usage > 85%
+          VALUE = {{ $value }}%
+
+- name: ClickHouse-Replication
+  rules:
+  - alert: ClickHouseReadonlyReplica
+    expr: ClickHouseMetrics_ReadonlyReplica != 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse has read-only replicas (instance {{ $labels.instance }})"
+      description: "ReadonlyReplica metric != 0 - one or more replicated tables are stuck read-only, likely a Keeper registration/coordination issue\nVALUE = {{ $value }}"
+
+- name: ClickHouse-Query-Errors
+  rules:
+  - alert: ClickHouseUnknownTableSpike
+    expr: increase(ClickHouseErrorMetric_UNKNOWN_TABLE[5m]) > 3
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Spike in UNKNOWN_TABLE errors (instance {{ $labels.instance }})"
+      description: "Multiple UNKNOWN_TABLE errors in 5m - almost always a missing MV/table on one or more replicas, causing live user-facing 500s\nVALUE = {{ $value }}"
+
+- name: Pod-Lifecycle
+  rules:
+  - alert: PodRestarted
+    expr: increase(kube_pod_container_status_restarts_total{namespace="vv-prod"}[10m]) > 0
+    labels:
+      severity: warning
+    annotations:
+      summary: "Pod {{ $labels.pod }} restarted"
+      description: "Container {{ $labels.container }} in pod {{ $labels.pod }} restarted in the last 10m\nVALUE = {{ $value }}"
+  - alert: PodOOMKilled
+    expr: kube_pod_container_status_last_terminated_reason{namespace="vv-prod", reason="OOMKilled"} == 1
+    labels:
+      severity: critical
+    annotations:
+      summary: "Pod {{ $labels.pod }} was OOM-killed"
+      description: "Container {{ $labels.container }} in pod {{ $labels.pod }} exceeded its memory limit and was hard-killed by the kernel"
+
+- name: Airflow-Health
+  rules:
+  - alert: AirflowSchedulerDown
+    expr: kube_deployment_status_replicas_available{namespace="airflow", deployment=~".*scheduler.*"} == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Airflow scheduler has no available replicas"
+      description: "Scheduler deployment in the airflow namespace has 0 available replicas - DAG runs will stall and no new tasks get scheduled\nVALUE = {{ $value }}"
+  - alert: AirflowDagRunFailed
+    expr: increase(airflow_dag_run_failed[15m]) > 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Airflow DAG run failed (dag {{ $labels.dag_id }})"
+      description: "One or more DAG runs failed in the last 15m\nVALUE = {{ $value }}"
+  - alert: AirflowDagRunStuckRunning
+    expr: (time() - airflow_dag_run_start_timestamp) > 21600 and on(dag_id) airflow_dag_run_state == 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Airflow DAG run stuck in Running (dag {{ $labels.dag_id }})"
+      description: "DAG run has stayed in Running state for over 6h - can mask a hung/false-success run\nVALUE = {{ $value }}"
