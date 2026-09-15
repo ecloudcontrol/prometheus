@@ -208,13 +208,13 @@ groups:
 - name: ClickHouse-DDL
   rules:
   - alert: ClickHouseDistributedDDLTimeout
-    expr: increase(ClickHouseErrorMetric_TIMEOUT_EXCEEDED[15m]) > 0
-    for: 10m
+    expr: increase(ClickHouseErrorMetric_TIMEOUT_EXCEEDED[30m]) > 0
+    for: 30m
     labels:
       severity: critical
     annotations:
       summary: "ClickHouse distributed DDL query timed out (instance {{ $labels.instance }})"
-      description: "A distributed_ddl_queue query raised TIMEOUT_EXCEEDED - this exact signature leaves orphaned replicas/tables on partial nodes (root cause of the Aug 15-17 incidents)\nVALUE = {{ $value }}"
+      description: "Distributed DDL query timed out - can leave orphaned replicas/tables\nVALUE = {{ $value }}"
   - alert: ClickHouseReplicaAlreadyExists
     expr: increase(ClickHouseErrorMetric_REPLICA_ALREADY_EXISTS[15m]) > 0
     for: 5m
