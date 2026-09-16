@@ -243,14 +243,13 @@ groups:
 - name: ClickHouse-Query-Errors
   rules:
   - alert: ClickHouseUnknownTableSpike
-    expr: increase(ClickHouseErrorMetric_UNKNOWN_TABLE[5m]) > 3
+    expr: increase(ClickHouseErrorMetric_UNKNOWN_TABLE[10m]) > 3
     for: 1m
     labels:
       severity: critical
     annotations:
       summary: "Spike in UNKNOWN_TABLE errors (instance {{ $labels.instance }})"
-      description: "Multiple UNKNOWN_TABLE errors in 5m - almost always a missing MV/table on one or more replicas, causing live user-facing 500s (this is exactly how the video_detected_placements_mv gap was first detected)\nVALUE = {{ $value }}"
-
+      description: "UNKNOWN_TABLE error spike in 10m - usually a missing MV/table on a replica, causing user-facing 500s.\nVALUE = {{ $value }}"
 - name: ClickHouse-Kafka
   rules:
   - alert: ClickHouseKafkaAssignmentFailure
