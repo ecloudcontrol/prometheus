@@ -208,10 +208,10 @@ groups:
 - name: ClickHouse-DDL
   rules:
   - alert: ClickHouseDistributedDDLTimeout
-    expr: increase(ClickHouseErrorMetric_TIMEOUT_EXCEEDED[30m]) > 0
-    for: 30m
+    expr: increase(ClickHouseErrorMetric_TIMEOUT_EXCEEDED[45m]) > 0
+    for: 1h
     labels:
-      severity: critical
+      severity: warning
     annotations:
       summary: "ClickHouse distributed DDL query timed out (instance {{ $labels.instance }})"
       description: "Distributed DDL query timed out - can leave orphaned replicas/tables\nVALUE = {{ $value }}"
