@@ -11,18 +11,12 @@ build:
     image_template: prometheus-3.4
 
 deploy:
-    context: alpha/PROD
+    context: alpha/DEV1
     type: statefulset
     replicas: 1
     port:
     - 9090
-    nodeSelector:
-      nodepool: tikiller-chart
-    tolerations:
-      - key: nodepool
-        operator: Equal
-        value: tikiller-chart
-        effect: NoSchedule
+
 
 volumes:
   - claim: prometheus-data
@@ -33,4 +27,4 @@ volumes:
     
   
 properties:
-    revision : 8
+    revision : 0
