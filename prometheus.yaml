@@ -1,46 +1,46 @@
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
- 
+
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
             - alert-manager-0-27:9093
- 
+
 rule_files:
   - /opt/bitnami/prometheus/conf/rules.yaml
   - /opt/bitnami/prometheus/conf/alerts.yaml
- 
+
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
- 
+
   - job_name: 'node-exporter'
     static_configs:
       - targets:
           - 192.168.151.227:9100   # Ti-prod-worker-0  (5f7f8320)
           - 192.168.144.216:9100   # Ti-prod-worker-1  (5bf31ca4)
           - 192.168.162.48:9100    # Ti-prod-worker-2  (1f8fc1ad)
-          - 172.234.144.12:9100
-          - 172.234.136.73:9100
+          - 192.168.137.80:9100    # prod-engine-master (PRIVATE, was public 172.234.144.12)
+          - 192.168.1.9:9100       # VPN-Server-Prod / Ti-VPN-AWS-PROD (VPC IP, was public 172.234.136.73)
           - 192.168.176.96:9100
           - 192.168.131.158:9100
           - 192.168.131.175:9100
           - 192.168.131.180:9100
           - 192.168.171.196:9100
+          - 192.168.191.7:9100
           - 192.168.129.186:9100
-          - 192.168.183.33:9100
           - 192.168.171.230:9100
           - 192.168.162.187:9100
           - 192.168.169.82:9100
           - 192.168.157.212:9100
           - 192.168.129.173:9100
           - 192.168.147.133:9100
-          - 192.168.183.13:9100
+          - 192.168.183.33:9100
           - 192.168.129.112:9100
-          - 192.168.183.131:9100
+          - 192.168.183.13:9100
           - 192.168.129.249:9100
           - 192.168.154.187:9100
           - 192.168.164.213:9100
@@ -63,11 +63,11 @@ scrape_configs:
         target_label: nodename
         replacement: Ti-prod-worker-2
       - source_labels: [__address__]
-        regex: 172.234.144.12:9100
+        regex: 192.168.137.80:9100
         target_label: nodename
         replacement: prod-engine-master
       - source_labels: [__address__]
-        regex: 172.234.136.73:9100
+        regex: 192.168.1.9:9100
         target_label: nodename
         replacement: VPN-Server-Prod
       - source_labels: [__address__]
@@ -87,19 +87,19 @@ scrape_configs:
         target_label: nodename
         replacement: kafka-node-2
       - source_labels: [__address__]
-        regex: 192.168.183.13:9100
+        regex: 192.168.183.33:9100
         target_label: nodename
         replacement: chart-app-node-0
       - source_labels: [__address__]
-        regex: 192.168.129.186:9100
+        regex: 192.168.191.7:9100
         target_label: nodename
         replacement: chart-app-node-1
       - source_labels: [__address__]
-        regex: 192.168.183.33:9100
+        regex: 192.168.129.186:9100
         target_label: nodename
         replacement: chart-app-node-2
       - source_labels: [__address__]
-        regex: 192.168.183.131:9100
+        regex: 192.168.183.13:9100
         target_label: nodename
         replacement: chart-app-node-3
       - source_labels: [__address__]
@@ -170,7 +170,7 @@ scrape_configs:
   - job_name: 'kube-state-metrics'
     static_configs:
       - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
- 
+
   - job_name: 'kubernetes-cadvisor'
     scheme: https
     tls_config:
@@ -187,7 +187,7 @@ scrape_configs:
         regex: (.+)
         target_label: __metrics_path__
         replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
- 
+
   - job_name: 'kubernetes-kubelet'
     scheme: https
     metrics_path: /metrics
@@ -205,14 +205,14 @@ scrape_configs:
         regex: (.+)
         target_label: __metrics_path__
         replacement: /api/v1/nodes/${1}/proxy/metrics
- 
+
   - job_name: 'windows_server'
     metrics_path: /metrics
     static_configs:
     - targets: ['172.239.142.27:9182']
       labels:
         instance: 'windows-server'
- 
+
   - job_name: 'kafka-exporter'
     kubernetes_sd_configs:
     - role: pod
@@ -229,7 +229,7 @@ scrape_configs:
       action: replace
     - target_label: component
       replacement: kafka
- 
+
   - job_name: 'kafka_jmx'
     kubernetes_sd_configs:
       - role: pod
@@ -246,7 +246,7 @@ scrape_configs:
       action: replace
     - target_label: component
       replacement: kafka-jmx
- 
+
   - job_name: 'mariadb-master-exporter'
     kubernetes_sd_configs:
       - role: pod
@@ -267,7 +267,7 @@ scrape_configs:
       replacement: master
     - target_label: db_engine
       replacement: mariadb
- 
+
   - job_name: 'mariadb-slave-exporter'
     kubernetes_sd_configs:
       - role: pod
@@ -290,7 +290,7 @@ scrape_configs:
       replacement: slave
     - target_label: db_engine
       replacement: mariadb
- 
+
   - job_name: 'mysql-slave-exporter'
     kubernetes_sd_configs:
       - role: pod
@@ -313,7 +313,7 @@ scrape_configs:
       replacement: slave
     - target_label: db_engine
       replacement: mysql
- 
+
   - job_name: 'mysql-slave-replica-exporter-0'
     kubernetes_sd_configs:
       - role: pod
@@ -336,7 +336,7 @@ scrape_configs:
       replacement: slave-replicas
     - target_label: db_engine
       replacement: mysql-replicas
- 
+
   - job_name: 'mysql-slave-replica-exporter-1'
     kubernetes_sd_configs:
       - role: pod
@@ -359,7 +359,7 @@ scrape_configs:
       replacement: slave-replicas
     - target_label: db_engine
       replacement: mysql-replicas
- 
+
   - job_name: 'mysql-slave-replica-exporter-2'
     kubernetes_sd_configs:
       - role: pod
@@ -382,7 +382,7 @@ scrape_configs:
       replacement: slave-replicas
     - target_label: db_engine
       replacement: mysql-replicas
- 
+
   - job_name: 'app_db_health'
     scrape_interval: 15s
     metrics_path: /probe
@@ -390,7 +390,7 @@ scrape_configs:
       module: [http_2xx]
     static_configs:
       - targets: ['mysql-healthcheck-3-11:5000/health/db']
- 
+
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -413,7 +413,7 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
- 
+
   - job_name: 'windows_rdp_tcp_check'
     scrape_interval: 15s
     metrics_path: /probe
@@ -430,7 +430,7 @@ scrape_configs:
         replacement: windows-server
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
- 
+
   - job_name: 'windows_exporter_http_check'
     scrape_interval: 15s
     metrics_path: /probe
@@ -447,8 +447,8 @@ scrape_configs:
         replacement: windows-server
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
- 
- 
+
+
   - job_name: 'blackbox_prod_apps_tcp'
     scrape_interval: 15s
     metrics_path: /probe
@@ -493,7 +493,7 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
- 
+
       - source_labels: [__param_target]
         regex: '192\.168\.151\.227:30134'
         target_label: app
@@ -614,7 +614,7 @@ scrape_configs:
         regex: '192\.168\.151\.227:32003'
         target_label: app
         replacement: kafka-broker-2
- 
+
   # ---------------------------------------------------------------------
   # Infra/monitoring-stack  (alpha/PROD context)
   # ---------------------------------------------------------------------
@@ -639,7 +639,7 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
- 
+
       - source_labels: [__param_target]
         regex: '192\.168\.151\.227:30195'
         target_label: app
