@@ -43,9 +43,9 @@ scrape_configs:
     - targets: ['172.16.2.8:9182']
       labels:
         instance: 'UnityDC2'
-    - targets: ['10.5.1.4:9182']
-      labels:
-        instance: 'UNITYSQLSVR003'
+    #- targets: ['10.5.1.4:9182']
+    #  labels:
+    #    instance: 'UNITYSQLSVR003'
     - targets: ['172.16.30.12:9182']
       labels:
         instance: 'UNITYSQLSVR002'
@@ -86,7 +86,7 @@ scrape_configs:
       - targets:
           - '172.16.40.20'    # UnityTest01
           - '172.16.2.8'      # UnityDC2
-          - '10.5.1.4'        # UNITYSQLSVR003
+          #- '10.5.1.4'        # UNITYSQLSVR003
           - '172.16.30.12'    # UNITYSQLSVR002
           - '172.16.10.26'    # UNITYWEB02
           - '172.16.30.11'    # UNITYSQLSVR001
