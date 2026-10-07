@@ -25,30 +25,30 @@ scrape_configs:
           - 192.168.162.48:9100    # Ti-prod-worker-2  (1f8fc1ad)
           - 192.168.137.80:9100    # prod-engine-master (PRIVATE, was public 172.234.144.12)
           - 192.168.1.9:9100       # VPN-Server-Prod / Ti-VPN-AWS-PROD (VPC IP, was public 172.234.136.73)
-          - 192.168.176.96:9100
-          - 192.168.131.158:9100
-          - 192.168.131.175:9100
-          - 192.168.131.180:9100
-          - 192.168.171.196:9100
-          - 192.168.191.7:9100
-          - 192.168.129.186:9100
-          - 192.168.171.230:9100
-          - 192.168.162.187:9100
-          - 192.168.169.82:9100
-          - 192.168.157.212:9100
-          - 192.168.129.173:9100
-          - 192.168.147.133:9100
-          - 192.168.183.33:9100
-          - 192.168.129.112:9100
-          - 192.168.183.13:9100
-          - 192.168.129.249:9100
-          - 192.168.154.187:9100
-          - 192.168.164.213:9100
-          - 192.168.129.98:9100
-          - 192.168.1.142:9100
-          - 192.168.159.12:9100
-          - 192.168.159.45:9100
-          - 192.168.159.49:9100
+          - 192.168.176.96:9100    # mysql-prod-node-0  (29620353)
+          - 192.168.131.158:9100   # kafka-node-0  (08de54fa)
+          - 192.168.131.175:9100   # kafka-node-1  (1fcf6ac1)
+          - 192.168.131.180:9100   # kafka-node-2  (36643c8e)
+          - 192.168.171.196:9100   # MariaDB-node-0  (4513ea77)
+          - 192.168.191.7:9100     # chart-app-node-1  (3fc401bc)
+          - 192.168.129.186:9100   # chart-app-node-2  (4cd9b349)
+          - 192.168.171.230:9100   # MariaDB-node-1  (3871362f)
+          - 192.168.162.187:9100   # oddsmaker-node-0  (6494f967)
+          - 192.168.169.82:9100    # ai-feed-node-0  (0f2c2c14)
+          - 192.168.140.151:9100   # market-explorer-node-0  (0db5c3f3)
+          - 192.168.129.173:9100   # mysql-slave-replica-0  (127b7075)
+          - 192.168.147.133:9100   # wordpress-node-0  (22221f46)
+          - 192.168.183.33:9100    # chart-app-node-0  (49a6bcae)
+          - 192.168.129.112:9100   # mysql-slave-replica-1  (22d85cd3)
+          - 192.168.183.13:9100    # chart-app-node-3  (4595f534)
+          - 192.168.129.249:9100   # mysql-slave-replica-2  (32cb3a92)
+          - 192.168.154.187:9100   # ai-feed-node-1  (4e86dd6a)
+          - 192.168.164.213:9100   # fasalert-node-0  (340c61c0)
+          - 192.168.129.98:9100    # mysql-slave-replica-3  (4f3072a1)
+          - 192.168.1.142:9100     # real-time-server-node
+          - 192.168.159.12:9100    # micro-proxy-node-0  (24e0af08)
+          - 192.168.159.45:9100    # micro-proxy-node-1  (3612d2e7)
+          - 192.168.159.49:9100    # micro-proxy-node-2  (60d899d5)
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.151.227:9100        # lke503393-724930-5f7f83200000 (was 192.168.155.101)
@@ -63,110 +63,110 @@ scrape_configs:
         target_label: nodename
         replacement: Ti-prod-worker-2
       - source_labels: [__address__]
-        regex: 192.168.137.80:9100
+        regex: 192.168.137.80:9100         # TI-PROD-Master (non-LKE)
         target_label: nodename
         replacement: prod-engine-master
       - source_labels: [__address__]
-        regex: 192.168.1.9:9100
+        regex: 192.168.1.9:9100            # Ti-VPN-AWS-PROD (non-LKE)
         target_label: nodename
         replacement: VPN-Server-Prod
       - source_labels: [__address__]
-        regex: 192.168.176.96:9100
+        regex: 192.168.176.96:9100         # lke503393-901000-296203530000
         target_label: nodename
         replacement: mysql-prod-node-0
       - source_labels: [__address__]
-        regex: 192.168.131.158:9100
+        regex: 192.168.131.158:9100        # lke503393-771400-08de54fa0000
         target_label: nodename
         replacement: kafka-node-0
       - source_labels: [__address__]
-        regex: 192.168.131.175:9100
+        regex: 192.168.131.175:9100        # lke503393-771400-1fcf6ac10000
         target_label: nodename
         replacement: kafka-node-1
       - source_labels: [__address__]
-        regex: 192.168.131.180:9100
+        regex: 192.168.131.180:9100        # lke503393-771400-36643c8e0000
         target_label: nodename
         replacement: kafka-node-2
       - source_labels: [__address__]
-        regex: 192.168.183.33:9100
+        regex: 192.168.183.33:9100         # lke503393-771758-49a6bcae0000
         target_label: nodename
         replacement: chart-app-node-0
       - source_labels: [__address__]
-        regex: 192.168.191.7:9100
+        regex: 192.168.191.7:9100          # lke503393-771758-3fc401bc0000
         target_label: nodename
         replacement: chart-app-node-1
       - source_labels: [__address__]
-        regex: 192.168.129.186:9100
+        regex: 192.168.129.186:9100        # lke503393-771758-4cd9b3490000
         target_label: nodename
         replacement: chart-app-node-2
       - source_labels: [__address__]
-        regex: 192.168.183.13:9100
+        regex: 192.168.183.13:9100         # lke503393-771758-4595f5340000
         target_label: nodename
         replacement: chart-app-node-3
       - source_labels: [__address__]
-        regex: 192.168.171.196:9100
+        regex: 192.168.171.196:9100        # lke503393-904225-4513ea770000
         target_label: nodename
         replacement: MariaDB-node-0
       - source_labels: [__address__]
-        regex: 192.168.171.230:9100
+        regex: 192.168.171.230:9100        # lke503393-904225-3871362f0000
         target_label: nodename
         replacement: MariaDB-node-1
       - source_labels: [__address__]
-        regex: 192.168.162.187:9100
+        regex: 192.168.162.187:9100        # lke503393-886917-6494f9670000
         target_label: nodename
         replacement: oddsmaker-node-0
       - source_labels: [__address__]
-        regex: 192.168.169.82:9100
+        regex: 192.168.140.151:9100        # lke503393-806444-0db5c3f30000
         target_label: nodename
         replacement: market-explorer-node-0
       - source_labels: [__address__]
-        regex: 192.168.157.212:9100
+        regex: 192.168.164.213:9100        # lke503393-812536-340c61c00000
         target_label: nodename
         replacement: fasalert-node-0
       - source_labels: [__address__]
-        regex: 192.168.129.173:9100
+        regex: 192.168.129.173:9100        # lke503393-901000-127b70750000
         target_label: nodename
         replacement: mysql-slave-replica-0
       - source_labels: [__address__]
-        regex: 192.168.147.133:9100
+        regex: 192.168.169.82:9100         # lke503393-854869-0f2c2c140000
         target_label: nodename
         replacement: ai-feed-node-0
       - source_labels: [__address__]
-        regex: 192.168.129.112:9100
+        regex: 192.168.129.112:9100        # lke503393-901000-22d85cd30000
         target_label: nodename
         replacement: mysql-slave-replica-1
       - source_labels: [__address__]
-        regex: 192.168.129.249:9100
+        regex: 192.168.129.249:9100        # lke503393-901000-32cb3a920000
         target_label: nodename
         replacement: mysql-slave-replica-2
       - source_labels: [__address__]
-        regex: 192.168.154.187:9100
+        regex: 192.168.154.187:9100        # lke503393-854869-4e86dd6a0000
         target_label: nodename
         replacement: ai-feed-node-1
       - source_labels: [__address__]
-        regex: 192.168.164.213:9100
+        regex: 192.168.147.133:9100        # lke503393-902584-22221f460000
         target_label: nodename
         replacement: wordpress-node-0
       - source_labels: [__address__]
-        regex: 192.168.129.98:9100
+        regex: 192.168.129.98:9100         # lke503393-901000-4f3072a10000
         target_label: nodename
         replacement: mysql-slave-replica-3
       - source_labels: [__address__]
-        regex: 192.168.1.142:9100
+        regex: 192.168.1.142:9100          # realtime_alerts-server-prod (non-LKE)
         target_label: nodename
         replacement: real-time-server-node
       - source_labels: [__address__]
-        regex: 192.168.159.12:9100
+        regex: 192.168.159.12:9100         # lke503393-920339-24e0af080000
         target_label: nodename
-        replacement: micro-proxy-node-0     
+        replacement: micro-proxy-node-0
       - source_labels: [__address__]
-        regex: 192.168.159.45:9100
+        regex: 192.168.159.45:9100         # lke503393-920339-3612d2e70000
         target_label: nodename
         replacement: micro-proxy-node-1
       - source_labels: [__address__]
-        regex: 192.168.159.49:9100
+        regex: 192.168.159.49:9100         # lke503393-920339-60d899d50000
         target_label: nodename
         replacement: micro-proxy-node-2
-        
+
   - job_name: 'kube-state-metrics'
     static_configs:
       - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
@@ -383,6 +383,29 @@ scrape_configs:
     - target_label: db_engine
       replacement: mysql-replicas
 
+  - job_name: 'mysql-slave-replica-exporter-3'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_name]
+      regex: mysql-replicas-8-0-3
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      regex: "9104"
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_ip]
+      target_label: __address__
+      replacement: ${1}:9104
+      action: replace
+    - target_label: slave_id
+      replacement: mysql-replicas-3
+    - target_label: instance
+      replacement: mysql-replicas-3
+    - target_label: role
+      replacement: slave-replicas
+    - target_label: db_engine
+      replacement: mysql-replicas
+
   - job_name: 'app_db_health'
     scrape_interval: 15s
     metrics_path: /probe
@@ -398,7 +421,7 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
-        
+
   - job_name: 'tcp_connect_check'
     scrape_interval: 15s
     metrics_path: /probe
