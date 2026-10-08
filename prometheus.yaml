@@ -33,7 +33,7 @@ scrape_configs:
           - 192.168.191.7:9100     # chart-app-node-1  (3fc401bc)
           - 192.168.129.186:9100   # chart-app-node-2  (4cd9b349)
           - 192.168.171.230:9100   # MariaDB-node-1  (3871362f)
-          - 192.168.162.187:9100   # oddsmaker-node-0  (6494f967)
+          - 192.168.141.152:9100   # oddsmaker-node-0  (6494f967)
           - 192.168.169.82:9100    # ai-feed-node-0  (0f2c2c14)
           - 192.168.140.151:9100   # market-explorer-node-0  (0db5c3f3)
           - 192.168.129.173:9100   # mysql-slave-replica-0  (127b7075)
@@ -111,7 +111,7 @@ scrape_configs:
         target_label: nodename
         replacement: MariaDB-node-1
       - source_labels: [__address__]
-        regex: 192.168.162.187:9100        # lke503393-886917-6494f9670000
+        regex: 192.168.141.152:9100        # lke503393-886917-6494f9670000
         target_label: nodename
         replacement: oddsmaker-node-0
       - source_labels: [__address__]
