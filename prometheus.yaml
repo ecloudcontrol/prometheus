@@ -26,9 +26,9 @@ scrape_configs:
           - 192.168.137.80:9100    # prod-engine-master (PRIVATE, was public 172.234.144.12)
           - 192.168.1.9:9100       # VPN-Server-Prod / Ti-VPN-AWS-PROD (VPC IP, was public 172.234.136.73)
           - 192.168.176.96:9100    # mysql-prod-node-0  (29620353)
-          - 192.168.131.158:9100   # kafka-node-0  (08de54fa)
-          - 192.168.131.175:9100   # kafka-node-1  (1fcf6ac1)
-          - 192.168.131.180:9100   # kafka-node-2  (36643c8e)
+          - 192.168.131.180:9100   # kafka-node-0  (08de54fa)  (was 192.168.131.158)
+          - 192.168.131.158:9100   # kafka-node-1  (1fcf6ac1)  (was 192.168.131.175)
+          - 192.168.159.49:9100    # kafka-node-2  (36643c8e)  (was 192.168.131.180)
           - 192.168.171.196:9100   # MariaDB-node-0  (4513ea77)
           - 192.168.191.7:9100     # chart-app-node-1  (3fc401bc)
           - 192.168.129.186:9100   # chart-app-node-2  (4cd9b349)
@@ -46,9 +46,9 @@ scrape_configs:
           - 192.168.164.213:9100   # fasalert-node-0  (340c61c0)
           - 192.168.129.98:9100    # mysql-slave-replica-3  (4f3072a1)
           - 192.168.1.142:9100     # real-time-server-node
-          - 192.168.159.12:9100    # micro-proxy-node-0  (24e0af08)
-          - 192.168.159.45:9100    # micro-proxy-node-1  (3612d2e7)
-          - 192.168.159.49:9100    # micro-proxy-node-2  (60d899d5)
+          - 192.168.155.197:9100   # micro-proxy-node-0  (24e0af08)  (was 192.168.159.12)
+          - 192.168.159.12:9100    # micro-proxy-node-1  (3612d2e7)  (was 192.168.159.45)
+          - 192.168.159.45:9100    # micro-proxy-node-2  (60d899d5)  (was 192.168.159.49)
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.151.227:9100        # lke503393-724930-5f7f83200000 (was 192.168.155.101)
@@ -75,15 +75,15 @@ scrape_configs:
         target_label: nodename
         replacement: mysql-prod-node-0
       - source_labels: [__address__]
-        regex: 192.168.131.158:9100        # lke503393-771400-08de54fa0000
+        regex: 192.168.131.180:9100        # lke503393-771400-08de54fa0000 (was 192.168.131.158)
         target_label: nodename
         replacement: kafka-node-0
       - source_labels: [__address__]
-        regex: 192.168.131.175:9100        # lke503393-771400-1fcf6ac10000
+        regex: 192.168.131.158:9100        # lke503393-771400-1fcf6ac10000 (was 192.168.131.175)
         target_label: nodename
         replacement: kafka-node-1
       - source_labels: [__address__]
-        regex: 192.168.131.180:9100        # lke503393-771400-36643c8e0000
+        regex: 192.168.159.49:9100         # lke503393-771400-36643c8e0000 (was 192.168.131.180)
         target_label: nodename
         replacement: kafka-node-2
       - source_labels: [__address__]
@@ -155,15 +155,15 @@ scrape_configs:
         target_label: nodename
         replacement: real-time-server-node
       - source_labels: [__address__]
-        regex: 192.168.159.12:9100         # lke503393-920339-24e0af080000
+        regex: 192.168.155.197:9100        # lke503393-920339-24e0af080000 (was 192.168.159.12)
         target_label: nodename
         replacement: micro-proxy-node-0
       - source_labels: [__address__]
-        regex: 192.168.159.45:9100         # lke503393-920339-3612d2e70000
+        regex: 192.168.159.12:9100         # lke503393-920339-3612d2e70000 (was 192.168.159.45)
         target_label: nodename
         replacement: micro-proxy-node-1
       - source_labels: [__address__]
-        regex: 192.168.159.49:9100         # lke503393-920339-60d899d50000
+        regex: 192.168.159.45:9100         # lke503393-920339-60d899d50000 (was 192.168.159.49)
         target_label: nodename
         replacement: micro-proxy-node-2
 
