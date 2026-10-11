@@ -41,10 +41,10 @@ scrape_configs:
           - 192.168.183.33:9100    # chart-app-node-0  (49a6bcae)
           - 192.168.129.112:9100   # mysql-slave-replica-1  (22d85cd3)
           - 192.168.183.13:9100    # chart-app-node-3  (4595f534)
-          - 192.168.129.249:9100   # mysql-slave-replica-2  (32cb3a92)
+          - 192.168.129.98:9100    # mysql-slave-replica-2  (32cb3a92)  (was 192.168.129.249)
           - 192.168.154.187:9100   # ai-feed-node-1  (4e86dd6a)
           - 192.168.164.213:9100   # fasalert-node-0  (340c61c0)
-          - 192.168.129.98:9100    # mysql-slave-replica-3  (4f3072a1)
+          - 192.168.155.147:9100   # mysql-slave-replica-3  (4f3072a1)  (was 192.168.129.98)
           - 192.168.1.142:9100     # real-time-server-node
           - 192.168.155.197:9100   # micro-proxy-node-0  (24e0af08)  (was 192.168.159.12)
           - 192.168.159.12:9100    # micro-proxy-node-1  (3612d2e7)  (was 192.168.159.45)
@@ -135,7 +135,7 @@ scrape_configs:
         target_label: nodename
         replacement: mysql-slave-replica-1
       - source_labels: [__address__]
-        regex: 192.168.129.249:9100        # lke503393-901000-32cb3a920000
+        regex: 192.168.129.98:9100         # lke503393-901000-32cb3a920000 (was 192.168.129.249)
         target_label: nodename
         replacement: mysql-slave-replica-2
       - source_labels: [__address__]
@@ -147,7 +147,7 @@ scrape_configs:
         target_label: nodename
         replacement: wordpress-node-0
       - source_labels: [__address__]
-        regex: 192.168.129.98:9100         # lke503393-901000-4f3072a10000
+        regex: 192.168.155.147:9100        # lke503393-901000-4f3072a10000 (was 192.168.129.98)
         target_label: nodename
         replacement: mysql-slave-replica-3
       - source_labels: [__address__]
