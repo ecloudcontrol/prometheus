@@ -402,6 +402,37 @@ groups:
       summary: "MariaDB Master in Read-Only Mode ({{ $labels.instance }})"
       description: |
         Master entered read-only mode — Writes will fail.
+- name: MariaDB-Backup
+  rules:
+
+  # Threshold 25e9 = ~45% of a real PROD archive (mariabackup-full-*.xbstream.zst = ~56 GB, 16/17 Oct 2026).
+  # With BACKUP_RETENTION=3 the PVC grows by one archive and later drops by one, so max-min over 26h
+  # stays ~56 GB on a good day; < 25 GB means no backup or a truncated one.
+  - alert: MariaDBBackupNotWritten
+    expr: |
+      (
+        max_over_time(kubelet_volume_stats_used_bytes{namespace="tradeideas-prod",persistentvolumeclaim=~".*backup.*mariadb-slave-chart-10-11-0"}[26h])
+        - min_over_time(kubelet_volume_stats_used_bytes{namespace="tradeideas-prod",persistentvolumeclaim=~".*backup.*mariadb-slave-chart-10-11-0"}[26h])
+      ) < 25e9
+    for: 30m
+    labels:
+      severity: critical
+    annotations:
+      summary: "No complete MariaDB backup written in 26h ({{ $labels.persistentvolumeclaim }})"
+      description: |
+        MariaDB backup volume grew by only {{ $value | humanize1024 }}B in the last 26h (a full backup is ~56 GB).
+        Nightly backup (21:30 PT / 10:00 AM IST) did not run, failed, or is incomplete.
+        Check /appz/log/db-backup.log in mariadb-slave-chart-10-11-0 (last line: all done (uploaded=yes))
+        and s3://mariadb-prod-backup/mariadb/YYYY/MM/DD/.
+
+  - alert: MariaDBBackupVolumeMetricsMissing
+    expr: absent(kubelet_volume_stats_used_bytes{namespace="tradeideas-prod",persistentvolumeclaim=~".*backup.*mariadb-slave-chart-10-11-0"})
+    for: 1h
+    labels:
+      severity: warning
+    annotations:
+      summary: "MariaDB backup volume metrics missing"
+      description: "No kubelet volume stats for the MariaDB slave backup PVC for 1h - backup status cannot be checked."
 
 - name: Kafka-JVMHighHeap
   rules:
@@ -572,4 +603,3 @@ groups:
       annotations:
         summary: "PVC critically full ({{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }})"
         description: "PVC {{ $labels.persistentvolumeclaim }} usage is {{ $value | printf \"%.1f\" }}% — risk of pod eviction."
-
