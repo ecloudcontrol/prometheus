@@ -24,6 +24,14 @@ scrape_configs:
           - 192.168.192.138:9100
           - 192.168.136.9:9100
           - 192.168.136.43:9100
+        labels:
+          cluster: pm-prod
+      - targets:
+          - 192.168.198.61:9100
+        labels:
+          cluster: pm-dev
+      - targets:
+          - 172.236.118.211 #cloudorbit master
 
 
     relabel_configs:
@@ -42,13 +50,25 @@ scrape_configs:
       - source_labels: [__address__]
         regex: 192.168.136.43:9100
         target_label: nodename
-        replacement: PM-prod-node-2
-     
+        replacement: PM-prod-node-2      
+      - source_labels: [__address__]
+        regex: 192.168.198.61:9100
+        target_label: nodename
+        replacement: PM-Dev-node  
+      - source_labels: [__address__]
+        regex: 172.236.118.211:9100
+        target_label: nodename
+        replacement: cloudorbit-master  
         
   - job_name: 'kube-state-metrics'
     static_configs:
-      - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
-
+      - targets: ['192.168.192.138:30000']
+        labels:
+          cluster: pm-prod
+      - targets: ['192.168.198.61:30000']
+        labels:
+          cluster: pm-dev
+          
   - job_name: 'kubernetes-cadvisor'
     scheme: https
     tls_config:
@@ -85,80 +105,4 @@ scrape_configs:
         replacement: /api/v1/nodes/${1}/proxy/metrics
 
 
-
-  - job_name: 'mariadb-master-exporter'
-    kubernetes_sd_configs:
-      - role: pod
-    relabel_configs:
-    - source_labels: [__meta_kubernetes_pod_label_run]
-      regex: mariadb-master-chart-10-11
-      action: keep
-    - source_labels: [__meta_kubernetes_pod_container_port_number]
-      regex: "9104"
-      action: keep
-    - source_labels: [__meta_kubernetes_pod_ip]
-      target_label: __address__
-      replacement: ${1}:9104
-      action: replace
-    - target_label: instance
-      replacement: mariadb-master
-    - target_label: role
-      replacement: master
-    - target_label: db_engine
-      replacement: mariadb
-
-  - job_name: 'mariadb-slave-exporter'
-    kubernetes_sd_configs:
-      - role: pod
-    relabel_configs:
-    - source_labels: [__meta_kubernetes_pod_label_run]
-      regex: mariadb-slave-chart-10-11
-      action: keep
-    - source_labels: [__meta_kubernetes_pod_container_port_number]
-      regex: "9104"
-      action: keep
-    - source_labels: [__meta_kubernetes_pod_ip]
-      target_label: __address__
-      replacement: ${1}:9104
-      action: replace
-    - target_label: slave_id
-      replacement: mariadb-slave-10-11
-    - target_label: instance
-      replacement: mariadb-slave-10-11
-    - target_label: role
-      replacement: slave
-    - target_label: db_engine
-      replacement: mariadb
-
-
-  - job_name: 'app_db_health'
-    scrape_interval: 15s
-    metrics_path: /probe
-    params:
-      module: [http_2xx]
-    static_configs:
-      - targets: ['mysql-healthcheck-3-11:5000/health/db']
-
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-      - target_label: __address__
-        replacement: blackbox-exporter-0-2:9115
-        
-  - job_name: 'tcp_connect_check'
-    scrape_interval: 15s
-    metrics_path: /probe
-    params:
-      module: [tcp_connect]
-    static_configs:
-      - targets: ['192.168.155.101:31192']
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-      - target_label: __address__
-        replacement: blackbox-exporter-0-2:9115
 
