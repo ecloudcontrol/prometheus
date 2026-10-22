@@ -24,7 +24,7 @@ scrape_configs:
           - 192.168.136.9:9100
           - 192.168.136.43:9100
           - 192.168.198.61:9100 # dev
-          - 172.236.118.211:9100 #cloudorbit master
+          - 192.168.208.168:9100 #cloudorbit master
 
 
     relabel_configs:
@@ -43,13 +43,9 @@ scrape_configs:
       - source_labels: [__address__]
         regex: 192.168.136.43:9100
         target_label: nodename
-        replacement: PM-prod-node-2      
+        replacement: PM-prod-node-2       
       - source_labels: [__address__]
-        regex: 192.168.198.61:9100
-        target_label: nodename
-        replacement: PM-Dev-node-0  
-      - source_labels: [__address__]
-        regex: 172.236.118.211:9100
+        regex: 192.168.208.168:9100
         target_label: nodename
         replacement: cloudorbit-master  
         
@@ -122,4 +118,27 @@ scrape_configs:
       - targets: ['192.168.198.61:10250']
         labels:
           cluster: pm-dev
+  # ---------- kubelet: PVC used/capacity bytes ----------
+  - job_name: 'pm-prod-kubelet'
+    scheme: https
+    metrics_path: /metrics
+    tls_config:
+      insecure_skip_verify: true
+    authorization:
+      credentials_file: /appz/data/lke/pm-prod-token
+    static_configs:
+      - targets: ['192.168.192.138:10250', '192.168.136.9:10250', '192.168.136.43:10250']
+        labels:
+          cluster: pm-prod
 
+  - job_name: 'pm-dev-kubelet'
+    scheme: https
+    metrics_path: /metrics
+    tls_config:
+      insecure_skip_verify: true
+    authorization:
+      credentials_file: /appz/data/lke/pm-dev-token
+    static_configs:
+      - targets: ['192.168.198.61:10250']
+        labels:
+          cluster: pm-dev
