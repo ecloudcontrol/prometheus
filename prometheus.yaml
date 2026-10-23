@@ -581,18 +581,18 @@ scrape_configs:
         regex: '192\.168\.151\.227:31295'
         target_label: app
         replacement: fastoplist-relay
-      - source_labels: [__param_target]
-        regex: '192\.168\.151\.227:30386'
-        target_label: app
-        replacement: lamp-productweb
+      # - source_labels: [__param_target]
+      #   regex: '192\.168\.151\.227:30386'
+      #   target_label: app
+      #   replacement: lamp-productweb
       - source_labels: [__param_target]
         regex: '192\.168\.151\.227:31598'
         target_label: app
         replacement: nginx
-      - source_labels: [__param_target]
-        regex: '192\.168\.151\.227:31573'
-        target_label: app
-        replacement: wordpress
+      # - source_labels: [__param_target]
+      #   regex: '192\.168\.151\.227:31573'
+      #   target_label: app
+      #   replacement: wordpress
       - source_labels: [__param_target]
         regex: '192\.168\.151\.227:32300'
         target_label: app
