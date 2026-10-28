@@ -484,6 +484,7 @@ scrape_configs:
           - '192.168.151.227:31393'   # FasMaster               (fasmaster-1-0)
           - '192.168.151.227:32762'   # Tunnel-Proxy            (http-tunnel-proxy-1-1)
           - '192.168.151.227:31389'   # Microproxy              (microproxy-1-0)
+          - '192.168.151.227:30686'   # Microproxy Demo         (microproxy-demo-1-0, internal only)
           - '192.168.151.227:31359'   # Misc MS                 (misc-ms-1-0)
           - '192.168.151.227:32029'   # Oddsmaker               (oddsmaker-1-0)
           - '192.168.151.227:31830'   # AI Feed                 (tiq-aifeed-1-0)
@@ -637,6 +638,10 @@ scrape_configs:
         regex: '192\.168\.151\.227:32003'
         target_label: app
         replacement: kafka-broker-2
+     - source_labels: [__param_target]
+        regex: '192\.168\.151\.227:30686'
+        target_label: app
+        replacement: microproxy-demo
 
   # ---------------------------------------------------------------------
   # Infra/monitoring-stack  (alpha/PROD context)
