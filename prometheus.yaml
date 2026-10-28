@@ -638,7 +638,7 @@ scrape_configs:
         regex: '192\.168\.151\.227:32003'
         target_label: app
         replacement: kafka-broker-2
-     - source_labels: [__param_target]
+      - source_labels: [__param_target]
         regex: '192\.168\.151\.227:30686'
         target_label: app
         replacement: microproxy-demo
