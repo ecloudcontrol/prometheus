@@ -46,26 +46,6 @@ groups:
         summary: High 15m CPU load ({{ $labels.instance }})
         description: "Load average > 90%\nVALUE = {{ $value }}"
 
-- name: network-probes
-  rules:
-    - alert: SiteDown
-      expr: probe_success == 0
-      for: 30s
-      labels:
-        severity: critical
-      annotations:
-        summary: "Site down: {{ $labels.instance }}"
-        description: "Blackbox TCP probe failed (possibly VPN or network down)"
-
-    - alert: HTTP200Fail
-      expr: probe_http_status_code != 200
-      for: 10s
-      labels:
-        severity: critical
-      annotations:
-        summary: "HTTP 200 check failed"
-        description: "Expected HTTP 200, got {{ $value }} from {{ $labels.instance }}"
-
 
 - name: PVC-usage
   rules:
