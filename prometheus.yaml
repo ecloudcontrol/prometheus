@@ -6,7 +6,7 @@ alerting:
   alertmanagers:
     - static_configs:
         - targets:
-            - alert-manager-0-27:9093
+            - alertmanager-0-28:9093
 
 rule_files:
   - /opt/bitnami/prometheus/conf/rules.yaml
@@ -23,10 +23,16 @@ scrape_configs:
           - 192.168.192.138:9100
           - 192.168.136.9:9100
           - 192.168.136.43:9100
-          - 192.168.198.61:9100 # dev
-          - 192.168.208.168:9100 #cloudorbit master
-
-
+        labels:
+          cluster: Plantmaster-PROD
+      - targets:
+          - 192.168.198.61:9100
+        labels:
+          cluster: Plantmaster-DEV
+      - targets:
+          - 192.168.208.168:9100
+        labels:
+          cluster: Plantmaster-cloudorbit-master
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.198.61:9100
@@ -43,21 +49,21 @@ scrape_configs:
       - source_labels: [__address__]
         regex: 192.168.136.43:9100
         target_label: nodename
-        replacement: PM-prod-node-2       
+        replacement: PM-prod-node-2
       - source_labels: [__address__]
         regex: 192.168.208.168:9100
         target_label: nodename
-        replacement: cloudorbit-master  
-        
+        replacement: cloudorbit-master
+
   - job_name: 'kube-state-metrics'
     static_configs:
       - targets: ['192.168.192.138:30000']
         labels:
-          cluster: pm-prod
+          cluster: Plantmaster-PROD
       - targets: ['192.168.198.61:30000']
         labels:
-          cluster: pm-dev
-          
+          cluster: Plantmaster-DEV
+
   - job_name: 'kubernetes-cadvisor'
     scheme: https
     tls_config:
@@ -93,8 +99,6 @@ scrape_configs:
         target_label: __metrics_path__
         replacement: /api/v1/nodes/${1}/proxy/metrics
 
-  # ---------- cAdvisor: pod CPU / memory, scraped from each LKE kubelet ----------
-  # LKE kubelets use self-signed certs, hence insecure_skip_verify (private network only).
   - job_name: 'pm-prod-cadvisor'
     scheme: https
     metrics_path: /metrics/cadvisor
@@ -105,7 +109,7 @@ scrape_configs:
     static_configs:
       - targets: ['192.168.192.138:10250', '192.168.136.9:10250', '192.168.136.43:10250']
         labels:
-          cluster: pm-prod
+          cluster: Plantmaster-PROD
 
   - job_name: 'pm-dev-cadvisor'
     scheme: https
@@ -117,8 +121,8 @@ scrape_configs:
     static_configs:
       - targets: ['192.168.198.61:10250']
         labels:
-          cluster: pm-dev
-  # ---------- kubelet: PVC used/capacity bytes ----------
+          cluster: Plantmaster-DEV
+
   - job_name: 'pm-prod-kubelet'
     scheme: https
     metrics_path: /metrics
@@ -129,7 +133,7 @@ scrape_configs:
     static_configs:
       - targets: ['192.168.192.138:10250', '192.168.136.9:10250', '192.168.136.43:10250']
         labels:
-          cluster: pm-prod
+          cluster: Plantmaster-PROD
 
   - job_name: 'pm-dev-kubelet'
     scheme: https
@@ -141,4 +145,4 @@ scrape_configs:
     static_configs:
       - targets: ['192.168.198.61:10250']
         labels:
-          cluster: pm-dev
+          cluster: Plantmaster-DEV
