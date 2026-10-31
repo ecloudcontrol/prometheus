@@ -146,3 +146,18 @@ scrape_configs:
       - targets: ['192.168.198.61:10250']
         labels:
           cluster: Plantmaster-DEV
+  - job_name: 'mariadb-master-exporter'
+    static_configs:
+      - targets: ['192.168.192.138:30104']
+        labels: { cluster: Plantmaster-PROD, dbnode: pm-prod-mariadb-master }
+      - targets: ['192.168.198.61:30104']
+        labels: { cluster: Plantmaster-DEV, dbnode: pm-dev-mariadb-master }
+
+  - job_name: 'mariadb-slave-exporter'
+    static_configs:
+      - targets: ['192.168.192.138:30105']
+        labels: { cluster: Plantmaster-PROD, dbnode: pm-prod-mariadb-slave-0 }
+      - targets: ['192.168.192.138:30106']
+        labels: { cluster: Plantmaster-PROD, dbnode: pm-prod-mariadb-slave-1 }
+      - targets: ['192.168.198.61:30105']
+        labels: { cluster: Plantmaster-DEV, dbnode: pm-dev-mariadb-slave-0 }
