@@ -26,7 +26,7 @@ groups:
 - name: Memory-usage
   rules:
   - alert: HostOutOfMemory
-    expr: node_memory_MemAvailable_bytes{instance!~"192.168.130.243:.*|192.168.143.189:.*|192.168.156.102:.*"} / node_memory_MemTotal_bytes{instance!~"192.168.130.243:.*|192.168.143.189:.*|192.168.156.102:.*"} * 100 < 8
+    expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 8
     for: 10m
     labels:
       severity: warning
@@ -89,14 +89,14 @@ groups:
 - name: PVC-usage
   rules:
     - alert: PVCHighUsage
-      expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) * 100 > 80
+      expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) * 100 > 85
       for: 5m
       labels:
         severity: warning
       annotations:
         summary: PVC high usage (namespace {{ $labels.namespace }}, claim {{ $labels.persistentvolumeclaim }})
         description: |-
-          Description: PVC usage > 80%
+          Description: PVC usage > 85%
           VALUE = {{ $value }}%
 
 - name: ClickHouse-Disk
