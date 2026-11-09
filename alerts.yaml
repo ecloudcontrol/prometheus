@@ -294,6 +294,6 @@ groups:
       labels:
         severity: critical
       annotations:
-        summary: "Extreme network traffic on plantmaster pods ({{ $labels.cluster }})"
-        description: "Total receive {{ $value | printf \"%.2f\" }} MB/s across all plantmaster pods — far above normal 0.007 MB/s external baseline. Possible DDoS."
+        summary: "High network traffic on plantmaster pods ({{ $labels.cluster }})"
+        description: "Total receive {{ $value | printf \"%.2f\" }} MB/s across all plantmaster pods — far above normal 0.007 MB/s external baseline."
 
